@@ -13,6 +13,13 @@
 <body></body>
 
 <script>
+    // Global variables
+    maxSNR = 12;   // dB
+    minSNR = -4;   // dB
+    currentSNR = maxSNR;
+    stepSize = 2; // dB
+    var currentSpeechPath = null; // Store current sentence globally
+
     // Audio setup
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -21,12 +28,6 @@
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer));
     }
-
-    // Global variables
-    maxSNR = 12;   // dB
-    minSNR = -4;   // dB
-    currentSNR = maxSNR;
-    stepSize = 2; // dB
 
     // Initialise jsPsych
     var jsPsych = initJsPsych({
@@ -110,7 +111,8 @@
 
             // Get audio file paths
             const speechPath = getNextSentence();
-            const babblePath = jsPsych.evaluateTimelineVariable('babble');
+            const snrStr = currentSNR >= 0 ? `+${currentSNR}` : `${currentSNR}`;
+            const babblePath = `sound/babble/SNR${snrStr}dB.wav`;
 
             if (!speechPath) {
                 console.log("No more sentences available.");
@@ -118,11 +120,8 @@
                 return;
             }
 
-            // Add data properties
-            jsPsych.data.addProperties({
-                sentence: speechPath,
-                SNR: currentSNR
-            });
+            // Store globally for data recording
+            currentSpeechPath = speechPath;
 
             // Load and play audio buffers
             Promise.all([
@@ -145,6 +144,12 @@
                 babbleSource.stop(startTime + 1.0 + speechSource.buffer.duration + 1.0);
             });
         },
+
+        // Store data for each trial
+        on_finish: function (data) {
+            data.sentence = currentSpeechPath;
+            data.SNR = currentSNR;
+        }
     };
 
     // Define response question
@@ -171,9 +176,7 @@
     // Define experiment procedure
     var exp_procedure = {
         timeline: [exp_sound, exp_question],
-        timeline_variables: [
-            { babble: 'sound/babble/SNR+12dB.wav' }
-        ],
+        repetitions: 3
     };
 
     exp_block.push(start_trial);
