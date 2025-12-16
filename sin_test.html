@@ -9,6 +9,13 @@
 
 <body></body>
 
-<script></script>
+<script>
+    // Initialise jsPsych
+    var jsPsych = initJsPsych({
+        on_finish: function () {
+            jsPsych.data.displayData();
+        }
+    });
+</script>
 
 </html>
