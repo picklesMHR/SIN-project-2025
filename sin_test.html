@@ -4,18 +4,129 @@
 <head>
     <title>SIN Test Experiment</title>
     <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
     <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body></body>
 
 <script>
+    // Audio setup
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function loadAudioBuffer(url) {
+        return fetch(url)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer));
+    }
+
+    // Global variables
+    maxSNR = 12;   // dB
+    minSNR = -4;   // dB
+    currentSNR = maxSNR;
+    stepSize = 2; // dB
+
     // Initialise jsPsych
     var jsPsych = initJsPsych({
         on_finish: function () {
             jsPsych.data.displayData();
         }
     });
+
+    // Preload audio files
+    var preload = {
+        type: jsPsychPreload,
+        continue_after_error: true,
+        audio: (function () {
+            let audioFiles = [];
+            // Load all sentences
+            for (let i = 1; i <= 10; i++) {
+                audioFiles.push(`sound/speech/list_1/sentence_${i}.wav`);
+            }
+            // Load all babble SNR levels
+            for (let snr = minSNR; snr <= maxSNR; snr += stepSize) {
+                audioFiles.push(`sound/babble/SNR${snr >= 0 ? `+${snr}` : `${snr}`}dB.wav`);
+            }
+            return audioFiles;
+        })()
+    };
+
+    // Define experiment block
+    var exp_block = [];
+
+    // Simple start trial to begin experiment
+    var start_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Press space to start the audio test.</p>',
+        choices: [' '],
+        // Ensure audio context is running
+        on_finish: function () {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+    };
+
+    // Define audio trial
+    var exp_sound = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Listening...</p>',
+        choices: "NO_KEYS",
+        trial_duration: 5000,
+
+        on_start: function (trial) {
+            // Ensure audio context is running
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Get audio file paths
+            const speechPath = jsPsych.evaluateTimelineVariable('speech');
+            const babblePath = jsPsych.evaluateTimelineVariable('babble');
+
+            // Load and play audio buffers
+            Promise.all([
+                loadAudioBuffer(speechPath),
+                loadAudioBuffer(babblePath)
+            ]).then(function (buffers) {
+                const speechSource = audioCtx.createBufferSource();
+                const babbleSource = audioCtx.createBufferSource();
+
+                speechSource.buffer = buffers[0];
+                babbleSource.buffer = buffers[1];
+
+                speechSource.connect(audioCtx.destination);
+                babbleSource.connect(audioCtx.destination);
+
+                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
+                const startTime = audioCtx.currentTime + 0.5;
+                babbleSource.start(startTime);
+                speechSource.start(startTime + 1.0);
+                babbleSource.stop(startTime + 1.0 + speechSource.buffer.duration + 1.0);
+            });
+        },
+    };
+
+    // Define experiment procedure
+    var exp_procedure = {
+        timeline: [exp_sound],
+        timeline_variables: [
+            { speech: 'sound/speech/list_1/sentence_1.wav', babble: 'sound/babble/SNR+12dB.wav' }
+        ],
+    };
+
+    exp_block.push(start_trial);
+    exp_block.push(preload);
+    exp_block.push(exp_procedure);
+
+    // Timeline flow
+    timeline = [];
+    timeline = timeline.concat(exp_block);
+
+    // Run the experiment
+    jsPsych.run(timeline);
+
 </script>
 
 </html>
