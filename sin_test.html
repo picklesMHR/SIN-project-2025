@@ -6,6 +6,7 @@
     <script src="jspsych/jspsych.js"></script>
     <script src="jspsych/plugin-preload.js"></script>
     <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
     <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -146,9 +147,30 @@
         },
     };
 
+    // Define response question
+    var exp_question = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: "Enter the words you heard in the audio:", name: 'response' }
+        ],
+        on_finish: function (data) {
+            const response = data.response.response.trim().toLowerCase();
+            const correctAnswer = "yes"; // Placeholder for correct answer logic
+
+            data.correct = (response === correctAnswer);
+
+            // Adjust SNR based on correctness
+            if (data.correct) {
+                currentSNR = Math.max(currentSNR - stepSize, minSNR);
+            } else {
+                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
+            }
+        }
+    };
+
     // Define experiment procedure
     var exp_procedure = {
-        timeline: [exp_sound],
+        timeline: [exp_sound, exp_question],
         timeline_variables: [
             { babble: 'sound/babble/SNR+12dB.wav' }
         ],
