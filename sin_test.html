@@ -48,7 +48,7 @@
             }
             // Load all babble SNR levels
             for (let snr = minSNR; snr <= maxSNR; snr += stepSize) {
-                audioFiles.push(`sound/babble/SNR${snr >= 0 ? `+${snr}` : `${snr}`}dB.wav`);
+                audioFiles.push(`sound/babble/SNR${snr}dB.wav`);
             }
             return audioFiles;
         })()
@@ -111,8 +111,7 @@
 
             // Get audio file paths
             const speechPath = getNextSentence();
-            const snrStr = currentSNR >= 0 ? `+${currentSNR}` : `${currentSNR}`;
-            const babblePath = `sound/babble/SNR${snrStr}dB.wav`;
+            const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
 
             if (!speechPath) {
                 console.log("No more sentences available.");
@@ -159,6 +158,7 @@
             { prompt: "Enter the words you heard in the audio:", name: 'response' }
         ],
         on_finish: function (data) {
+            // Score response correctness
             const response = data.response.response.trim().toLowerCase();
             const correctAnswer = "yes"; // Placeholder for correct answer logic
 
