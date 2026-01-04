@@ -13,12 +13,36 @@
 <body></body>
 
 <script>
-    // Global variables
+
+    /*********************************************************************************/
+    /******************************* Global Variables ********************************/
+    /*********************************************************************************/
+
     maxSNR = 12;   // dB
     minSNR = -4;   // dB
     currentSNR = maxSNR;
     stepSize = 2; // dB
     var currentSpeechPath = null; // Store current sentence globally
+
+    /*********************************************************************************/
+    /******************************* Global Functions ********************************/
+    /*********************************************************************************/
+
+    // Shuffle function
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Function to get next sentence
+    function getNextSentence() {
+        if (sentenceQueue.length === 0) {
+            return null;
+        }
+        return sentenceQueue.shift();
+    }
 
     // Audio setup
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -28,6 +52,10 @@
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer));
     }
+
+    /*********************************************************************************/
+    /***************************** Initialising jsPsych ******************************/
+    /*********************************************************************************/
 
     // Initialise jsPsych
     var jsPsych = initJsPsych({
@@ -54,34 +82,20 @@
         })()
     };
 
+    /*********************************************************************************/
+    /******************************* Experiment Block *******************************/
+    /*********************************************************************************/
+
+    // Define experiment block
+    var exp_block = [];
+
     // Define speech stimuli
     var speechStimuli = [];
     for (let i = 1; i <= 10; i++) {
         speechStimuli.push(`sound/speech/list_1/sentence_${i}.wav`);
     }
-
-    // Shuffle function
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
     shuffle(speechStimuli); // Shuffle sentences
-
     let sentenceQueue = [...speechStimuli]; // Queue of sentences
-
-    // Function to get next sentence
-    function getNextSentence() {
-        if (sentenceQueue.length === 0) {
-            return null;
-        }
-        return sentenceQueue.shift();
-    }
-
-    // Define experiment block
-    var exp_block = [];
 
     // Simple start trial to begin experiment
     var start_trial = {
@@ -183,9 +197,17 @@
     exp_block.push(preload);
     exp_block.push(exp_procedure);
 
+    /*********************************************************************************/
+    /******************************** Build Timeline *********************************/
+    /*********************************************************************************/
+
     // Timeline flow
     timeline = [];
     timeline = timeline.concat(exp_block);
+
+    /*********************************************************************************/
+    /********************************** Run jsPsych **********************************/
+    /*********************************************************************************/
 
     // Run the experiment
     jsPsych.run(timeline);
