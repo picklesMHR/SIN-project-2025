@@ -28,6 +28,15 @@
     /******************************* Global Functions ********************************/
     /*********************************************************************************/
 
+    // Audio setup
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function loadAudioBuffer(url) {
+        return fetch(url)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer));
+    }
+
     // Shuffle function
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -43,14 +52,61 @@
         }
         return sentenceQueue.shift();
     }
+    
+    /** Scoring functions for HINT responses **/
 
-    // Audio setup
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Normalize text by lowercasing, removing punctuation, and trimming whitespace
+    function normalise(text) {
+        return text
+            .toLowerCase()
+            .replace(/[^\w\s]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
 
-    function loadAudioBuffer(url) {
-        return fetch(url)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer));
+    // Expand "(A / The) boy (is / was) here" → [["a","the"],["boy"],["is","was"],["here"]]
+    function expandSentence(rawSentence) {
+        const tokens = rawSentence.split(" ");
+        const expanded = [];
+
+        tokens.forEach(token => {
+            if (token.startsWith("(") && token.endsWith(")")) {
+                const opts = token
+                    .slice(1, -1)
+                    .split("/")
+                    .map(w => normalise(w));
+                expanded.push(opts);
+            } else {
+                expanded.push([normalise(token)]);
+            }
+        });
+
+        return expanded;
+    }
+
+    // Score user response against expected sentence
+    function scoreHintResponse(rawSentence, userResponse) {
+        const expected = expandSentence(rawSentence);
+        const responseWords = normalise(userResponse).split(" ");
+
+        let correct = 0;
+        let total = expected.length;
+
+        const details = expected.map((options, i) => {
+            const match = responseWords.some(w => options.includes(w));
+            if (match) correct++;
+            return {
+                options,
+                matched: match
+            };
+        });
+
+        return {
+            correct,
+            total,
+            proportion: correct / total,
+            details
+        };
     }
 
     /*********************************************************************************/
