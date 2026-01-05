@@ -1,0 +1,16 @@
+{
+    "pracList": [
+        {"id": "L00_S01", "text": "(A/The) boy got into trouble." },
+        {"id": "L00_S02", "text": "The yellow pears taste good."},
+        {"id": "L00_S03", "text": "(A/The) front yard (is/was) pretty."},
+        {"id": "L00_S04", "text": "(An/The) old man (is/was) worried."},
+        {"id": "L00_S05", "text": "The pond water (is/was) dirty."},
+        {"id": "L00_S06", "text": "(A/The) rancher (has/had) (a/the) bull."},
+        {"id": "L00_S07", "text": "The ground (is/was) very hard."},
+        {"id": "L00_S08", "text": "They painted (a/the) wall white."},
+        {"id": "L00_S09", "text": "Dad stopped to pick some pears."},
+        {"id": "L00_S10", "text": "She made her bed and left."},
+        {"id": "L00_S11", "text": "He cut his index finger."},
+        {"id": "L00_S12", "text": "(A/The) baby (is/was) on (a/the) rug."}
+    ]
+}
