@@ -138,7 +138,21 @@
 
     // Initialise jsPsych
     var jsPsych = initJsPsych({
+        show_progress_bar: true,
         on_finish: function () {
+            // Calculate average SNR over last 5 trials
+            const snrData = jsPsych.data.get().filterCustom(d => Number.isFinite(d.SNR));
+            const snrValues = snrData.last(5).select('SNR').values;
+            const avgSNR = snrValues.length
+                ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
+                : null;
+            
+            // Add to last trial only
+            const allTrials = jsPsych.data.get().values();
+            if (allTrials.length > 0) {
+                allTrials[allTrials.length - 1].SNR_50 = avgSNR;
+            }
+            
             jsPsych.data.displayData();
         }
     });
@@ -266,7 +280,7 @@
     // Define experiment procedure
     var exp_procedure = {
         timeline: [exp_sound, exp_question],
-        repetitions: 3
+        repetitions: 13
     };
 
     exp_block.push(start_trial);
