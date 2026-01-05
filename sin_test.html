@@ -242,13 +242,20 @@
         ],
         on_finish: function (data) {
             // Score response correctness
-            const response = data.response.response.trim().toLowerCase();
-            const correctAnswer = "yes"; // Placeholder for correct answer logic
+            const userResponse = data.response.response.trim().toLowerCase();
+            const expectedSentence = currentSentenceData.text;
 
-            data.correct = (response === correctAnswer);
+            const score = scoreHintResponse(expectedSentence, userResponse);
+
+            data.user_response = userResponse;
+            data.expected_sentence = expectedSentence;
+            data.words_correct = score.correct;
+            data.words_total = score.total;
+            data.proportion_correct = score.proportion;
+            data.score_details = score.details;
 
             // Adjust SNR based on correctness
-            if (data.correct) {
+            if (score.proportion === 1.0) {
                 currentSNR = Math.max(currentSNR - stepSize, minSNR);
             } else {
                 currentSNR = Math.min(currentSNR + stepSize, maxSNR);
