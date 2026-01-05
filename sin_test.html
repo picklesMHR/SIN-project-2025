@@ -22,7 +22,8 @@
     minSNR = -4;   // dB
     currentSNR = maxSNR;
     stepSize = 2; // dB
-    var currentSpeechPath = null; // Store current sentence globally
+    var currentSentenceData = null; // Store current sentence object globally
+    var sentencePool = []; // Pool of sentences to draw from
 
     /*********************************************************************************/
     /******************************* Global Functions ********************************/
@@ -37,22 +38,44 @@
             .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer));
     }
 
-    // Shuffle function
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
+    // shuffleArray function
+    function shuffleArray(array) {
+        const arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
+        return arr;
+    }
+
+    // Function to prepare randomised sentence pool
+    async function prepareSentences() {
+        // Load sentence list JSON
+        const response = await fetch("configFiles/hint_sentence_lists.json");
+        const config = await response.json();
+
+        // Flatten sentences
+        const allSentences = Object.entries(config.rawLists).flatMap(([listId, sentences]) =>
+            sentences.map(sentence => ({
+                id: sentence.id,
+                text: sentence.text,
+                listId: listId,
+                path: `sound/speech/${sentence.id}.wav`
+            }))
+        );
+
+        // Shuffle sentences to create pool
+        sentencePool = shuffleArray(allSentences);
     }
 
     // Function to get next sentence
     function getNextSentence() {
-        if (sentenceQueue.length === 0) {
+        if (sentencePool.length === 0) {
             return null;
         }
-        return sentenceQueue.shift();
+        return sentencePool.pop();
     }
-    
+
     /** Scoring functions for HINT responses **/
 
     // Normalize text by lowercasing, removing punctuation, and trimming whitespace
@@ -126,10 +149,10 @@
         continue_after_error: true,
         audio: (function () {
             let audioFiles = [];
-            // Load all sentences
-            for (let i = 1; i <= 10; i++) {
-                audioFiles.push(`sound/speech/list_1/sentence_${i}.wav`);
-            }
+            // Load all sentence audio files
+            sentencePool.forEach(sentence => {
+                audioFiles.push(sentence.path);
+            });
             // Load all babble SNR levels
             for (let snr = minSNR; snr <= maxSNR; snr += stepSize) {
                 audioFiles.push(`sound/babble/SNR${snr}dB.wav`);
@@ -144,14 +167,6 @@
 
     // Define experiment block
     var exp_block = [];
-
-    // Define speech stimuli
-    var speechStimuli = [];
-    for (let i = 1; i <= 10; i++) {
-        speechStimuli.push(`sound/speech/list_1/sentence_${i}.wav`);
-    }
-    shuffle(speechStimuli); // Shuffle sentences
-    let sentenceQueue = [...speechStimuli]; // Queue of sentences
 
     // Simple start trial to begin experiment
     var start_trial = {
@@ -179,22 +194,16 @@
                 audioCtx.resume();
             }
 
-            // Get audio file paths
-            const speechPath = getNextSentence();
+            // Get next sentence object and babble track
+            const sentenceObj = getNextSentence();
             const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
 
-            if (!speechPath) {
-                console.log("No more sentences available.");
-                jsPsych.endCurrentTimeline();
-                return;
-            }
-
             // Store globally for data recording
-            currentSpeechPath = speechPath;
+            currentSentenceData = sentenceObj;
 
             // Load and play audio buffers
             Promise.all([
-                loadAudioBuffer(speechPath),
+                loadAudioBuffer(sentenceObj.path),
                 loadAudioBuffer(babblePath)
             ]).then(function (buffers) {
                 const speechSource = audioCtx.createBufferSource();
@@ -216,7 +225,11 @@
 
         // Store data for each trial
         on_finish: function (data) {
-            data.sentence = currentSpeechPath;
+            const sentenceData = currentSentenceData || {};
+            data.sentence_path = sentenceData.path || '';
+            data.sentence_id = sentenceData.id || '';
+            data.sentence_text = sentenceData.text || '';
+            data.list_id = sentenceData.listId || '';
             data.SNR = currentSNR;
         }
     };
@@ -266,7 +279,9 @@
     /*********************************************************************************/
 
     // Run the experiment
-    jsPsych.run(timeline);
+    prepareSentences().then(() => {
+        jsPsych.run(timeline);
+    });
 
 </script>
 
