@@ -119,13 +119,22 @@
     function scoreHintResponse(rawSentence, userResponse) {
         const expected = expandSentence(rawSentence);
         const responseWords = normalise(userResponse).split(" ");
+        const usedIndices = new Set(); // Track which response words have been used
 
         let correct = 0;
         let total = expected.length;
 
         const details = expected.map((options, i) => {
-            const match = responseWords.some(w => options.includes(w));
-            if (match) correct++;
+            let match = false;
+            // Check if any unused response word matches this expected position
+            for (let j = 0; j < responseWords.length; j++) {
+                if (!usedIndices.has(j) && options.includes(responseWords[j])) {
+                    match = true;
+                    correct++;
+                    usedIndices.add(j); // Mark this response word as used
+                    break; // Found a match, move to next expected word
+                }
+            }
             return {
                 options,
                 matched: match
@@ -142,11 +151,7 @@
 
     // Generate HTML feedback comparing user response to expected sentence
     function generateFeedbackHTML(expectedSentence, userResponse, score) {
-        // Compute expected words
-        const expected = expandSentence(expectedSentence);
-        const responseWords = normalise(userResponse).split(" ");
-
-        // Build feedback HTML
+        // Build feedback HTML using pre-computed score details
         let feedbackHTML = '<div style="text-align: center; font-size: 18px;">';
         feedbackHTML += '<h3>Feedback</h3>';
         feedbackHTML += `<p><strong>Your score: ${score.correct}/${score.total} words correct (${Math.round(score.proportion * 100)}%)</strong></p>`;
@@ -155,12 +160,11 @@
         feedbackHTML += '<p style="margin: 20px 0;"><strong>Expected sentence:</strong></p>';
         feedbackHTML += '<p style="font-size: 16px; line-height: 2; font-family: monospace;">';
 
-        // Highlight each word based on correctness
-        expected.forEach((options, i) => {
-            const matched = responseWords.some(w => options.includes(w));
-            const sentenceWords = expectedSentence.split(" ");
+        // Use the score details to highlight each word
+        const sentenceWords = expectedSentence.split(" ");
+        score.details.forEach((detail, i) => {
             const displayWord = sentenceWords[i] || '';
-            const statusColor = matched ? 'green' : 'red';
+            const statusColor = detail.matched ? 'green' : 'red';
             feedbackHTML += `<span style="color: ${statusColor}; margin: 0 8px;">${displayWord}</span>`;
         });
 
@@ -805,10 +809,10 @@
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
     timeline = timeline.concat(sound_check_procedure);
-    timeline = timeline.concat(practice_instructions_block);
-    timeline = timeline.concat(practice_block);
-    timeline = timeline.concat(pretest_instructions_block);
-    timeline = timeline.concat(pretest_block);
+    // timeline = timeline.concat(practice_instructions_block);
+    // timeline = timeline.concat(practice_block);
+    // timeline = timeline.concat(pretest_instructions_block);
+    // timeline = timeline.concat(pretest_block);
     timeline = timeline.concat(training_instructions_block);
     timeline = timeline.concat(training_block);
     timeline = timeline.concat(posttest_instructions_block);
