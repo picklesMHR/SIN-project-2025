@@ -808,9 +808,9 @@
     // Run the experiment
     Promise.all([
         prepareSentences("configFiles/hint_practice_list.json", false),  // unshuffled practice sentences
-        prepareSentences("configFiles/hint_sentence_lists.json", true),  // shuffled pretest sentences
-        prepareSentences("configFiles/hint_sentence_lists.json", true),  // shuffled training sentences
-        prepareSentences("configFiles/hint_sentence_lists.json", true)   // shuffled posttest sentences
+        prepareSentences("configFiles/hint_pretest_list.json", true),  // shuffled pretest sentences
+        prepareSentences("configFiles/hint_training_list.json", true),  // shuffled training sentences
+        prepareSentences("configFiles/hint_posttest_list.json", true)   // shuffled posttest sentences
     ]).then(([practiceSents, pretestSents, trainingSents, posttestSents]) => {
         practiceSentences = practiceSents;
         pretestSentences = pretestSents;

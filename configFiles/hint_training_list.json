@@ -1,0 +1,124 @@
+{
+    "rawLists": {
+        "4": [
+            { "id": "L04_S01", "text": "(A/The) little boy left home."},
+            { "id": "L04_S02", "text": "They are going out tonight."},
+            { "id": "L04_S03", "text": "(A/The) cat jumped over (a/the) fence."},
+            { "id": "L04_S04", "text": "He wore his yellow shirt."},
+            { "id": "L04_S05", "text": "(A/The) lady sits in her chair."},
+            { "id": "L04_S06", "text": "He needs his vacation."},
+            { "id": "L04_S07", "text": "She is washing her new silk dress."},
+            { "id": "L04_S08", "text": "(A/The) cat drank from (a/the) saucer."},
+            { "id": "L04_S09", "text": "Mother opened (a/the) drawer."},
+            { "id": "L04_S10", "text": "(A/The) lady packed her bag."}
+        ],
+        "10": [
+            { "id": "L10_S01", "text": "(A/The) boy broke (a/the) wooden fence."},
+            { "id": "L10_S02", "text": "(An/The) angry man shouted."},
+            { "id": "L10_S03", "text": "Yesterday he lost his hat."},
+            { "id": "L10_S04", "text": "(A/The) nervous driver got lost."},
+            { "id": "L10_S05", "text": "(A/The) cook (is/was) baking (a/the) cake."},
+            { "id": "L10_S06", "text": "(A/The) chicken laid some eggs."},
+            { "id": "L10_S07", "text": "(A/The) fish swam in (a/the) pond."},
+            { "id": "L10_S08", "text": "They met some friends at dinner."},
+            { "id": "L10_S09", "text": "(A/The) man called the police."},
+            { "id": "L10_S10", "text": "(A/The) truck made it up (a/the) hill."}
+        ],
+        "12": [
+            { "id": "L12_S01", "text": "(A/The) boy went to bed early."},
+            { "id": "L12_S02", "text": "(A/The) woman cleaned her house."},
+            { "id": "L12_S03", "text": "(A/The) sharp knife (is/was) dangerous."},
+            { "id": "L12_S04", "text": "(A/The) child ripped open (a/the) bag."},
+            { "id": "L12_S05", "text": "They had some cold chops for lunch."},
+            { "id": "L12_S06", "text": "She’s helping her friend move."},
+            { "id": "L12_S07", "text": "They ate (a/the) lemon pie."},
+            { "id": "L12_S08", "text": "They (are/were) crossing (a/the) street."},
+            { "id": "L12_S09", "text": "The sun melted the snow."},
+            { "id": "L12_S10", "text": "(A/The) little girl (is/was) happy."}
+        ],
+        "13": [
+            { "id": "L13_S01", "text": "She found her purse in (a/the) trash."},
+            { "id": "L13_S02", "text": "(A/The) table (has/had) three legs."},
+            { "id": "L13_S03", "text": "The children waved at (a/the) train."},
+            { "id": "L13_S04", "text": "Her coat (is/was) on (a/the) chair."},
+            { "id": "L13_S05", "text": "(A/The) girl (is/was) fixing her dress."},
+            { "id": "L13_S06", "text": "It’s time to go to bed."},
+            { "id": "L13_S07", "text": "Mother read the instructions."},
+            { "id": "L13_S08", "text": "(A/The) dog (is/was) eating some meat."},
+            { "id": "L13_S09", "text": "Father forgot the bread."},
+            { "id": "L13_S10", "text": "(A/The) road goes up (a/the) hill."}
+        ],
+        "15": [
+            { "id": "L15_S01", "text": "(A/The) house (has/had) nine bedrooms."},
+            { "id": "L15_S02", "text": "They’re shopping for school clothes."},
+            { "id": "L15_S03", "text": "They’re playing in (a/the) park."},
+            { "id": "L15_S04", "text": "Rain (is/was) good for the trees."},
+            { "id": "L15_S05", "text": "They sat on (a/the) wooden bench."},
+            { "id": "L15_S06", "text": "(A/The) child drank some fresh milk."},
+            { "id": "L15_S07", "text": "(A/The) baby slept all night."},
+            { "id": "L15_S08", "text": "(A/The) salt shaker (is/was) empty."},
+            { "id": "L15_S09", "text": "(A/The) policeman knows the way."},
+            { "id": "L15_S10", "text": "The buckets fill up quickly."}
+        ],
+        "17": [
+            { "id": "L17_S01", "text": "Mother picked some flowers."},
+            { "id": "L17_S02", "text": "(A/The) puppy played with (a/the) ball."},
+            { "id": "L17_S03", "text": "(An/The) engine (is/was) running."},
+            { "id": "L17_S04", "text": "(An/The) old woman (is/was) at home."},
+            { "id": "L17_S05", "text": "They’re watching (a/the) train go by."},
+            { "id": "L17_S06", "text": "(An/The) oven (is/was) too hot."},
+            { "id": "L17_S07", "text": "They rode their bicycles."},
+            { "id": "L17_S08", "text": "(A/The) big fish got away."},
+            { "id": "L17_S09", "text": "They laughed at his story."},
+            { "id": "L17_S10", "text": "They walked across the grass."}
+        ],
+        "19": [
+            { "id": "L19_S01", "text": "(A/The) painter uses (a/the) brush."},
+            { "id": "L19_S02", "text": "(A/The) family bought (a/the) house."},
+            { "id": "L19_S03", "text": "Swimmers can hold their breath."},
+            { "id": "L19_S04", "text": "She cut (a/the) steak with her knife."},
+            { "id": "L19_S05", "text": "They’re pushing an old car."},
+            { "id": "L19_S06", "text": "The food (is/was) expensive."},
+            { "id": "L19_S07", "text": "The children (are/were) walking home."},
+            { "id": "L19_S08", "text": "They (have/had) two empty bottles."},
+            { "id": "L19_S09", "text": "Milk comes in (a/the) carton."},
+            { "id": "L19_S10", "text": "(A/The) dog sleeps in (a/the) basket."}
+        ],
+        "22": [
+            { "id": "L22_S01", "text": "(A/The) girl came into (a/the) room."},
+            { "id": "L22_S02", "text": "(A/The) field mouse found (a/the) cheese."},
+            { "id": "L22_S03", "text": "They’re buying some fresh bread."},
+            { "id": "L22_S04", "text": "(A/The) machine (is/was) noisy."},
+            { "id": "L22_S05", "text": "The rice pudding (is/was) ready."},
+            { "id": "L22_S06", "text": "They had a wonderful day."},
+            { "id": "L22_S07", "text": "(An/The) exit (is/was) well lit."},
+            { "id": "L22_S08", "text": "(A/The) train stops at (a/the) station."},
+            { "id": "L22_S09", "text": "He (is/was) sucking his thumb."},
+            { "id": "L22_S10", "text": "(A/The) big boy kicked the ball."}
+        ],
+        "23": [
+            { "id": "L23_S01", "text": "The paint dripped on the ground."},
+            { "id": "L23_S02", "text": "(A/The) towel fell on (a/the) floor."},
+            { "id": "L23_S03", "text": "(A/The) family likes fish."},
+            { "id": "L23_S04", "text": "The bananas (are/were) too ripe."},
+            { "id": "L23_S05", "text": "He grew lots of vegetables."},
+            { "id": "L23_S06", "text": "She argues with her sister."},
+            { "id": "L23_S07", "text": "(A/The) kitchen window (is/was) clean."},
+            { "id": "L23_S08", "text": "He hung up his raincoat."},
+            { "id": "L23_S09", "text": "(A/The) mailman brought (a/the) letter."},
+            { "id": "L23_S10", "text": "(A/The) mother heard (a/the) baby."}
+        ],
+        "24": [
+            { "id": "L24_S01", "text": "(A/The) waiter brought (a/the) cream."},
+            { "id": "L24_S02", "text": "(A/The) teapot (is/was) very hot."},
+            { "id": "L24_S03", "text": "(An/The) apple pie (is/was) good."},
+            { "id": "L24_S04", "text": "(A/The) lolly jar (is/was) full."},
+            { "id": "L24_S05", "text": "(A/The) girl (is/was) washing her hair."},
+            { "id": "L24_S06", "text": "(A/The) girl played with (a/the) baby."},
+            { "id": "L24_S07", "text": "(A/The) cow (is/was) milked every day."},
+            { "id": "L24_S08", "text": "They called an ambulance."},
+            { "id": "L24_S09", "text": "They (are/were) drinking coffee."},
+            { "id": "L24_S10", "text": "He climbed up (a/the) ladder."}
+        ]
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "rawLists": {
+        "3": [
+            { "id": "L03_S01", "text": "They heard (a/the) funny noise."},
+            { "id": "L03_S02", "text": "He found his brother hiding."},
+            { "id": "L03_S03", "text": "(A/The) dog played with (a/the) stick."},
+            { "id": "L03_S04", "text": "(A/The) book tells (a/the) story."},
+            { "id": "L03_S05", "text": "The matches (are/were) on (a/the) shelf."},
+            { "id": "L03_S06", "text": "The milk (is/was) by (a/the) front door."},
+            { "id": "L03_S07", "text": "(A/The) broom (is/was) in (a/the) corner."},
+            { "id": "L03_S08", "text": "(A/The) new road (is/was) on (a/the) map."},
+            { "id": "L03_S09", "text": "She lost her credit card."},
+            { "id": "L03_S10", "text": "(A/The) team (is/was) playing well."}
+        ],
+        "8": [
+            { "id": "L08_S06", "text": "The children helped their teacher."},
+            { "id": "L08_S07", "text": "They carried some shopping bags."},
+            { "id": "L08_S08", "text": "Someone (is/was) crossing (a/the) road."},
+            { "id": "L08_S09", "text": "She uses her spoon to eat."},
+            { "id": "L08_S10", "text": "(A/The) cat lay on (a/the) bed."}
+        ]
+    }
+}
