@@ -224,6 +224,81 @@
     // Define practice block
     var practice_block = [];
 
+    // Simple start trial to begin practice
+    var practice_start_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Press space to start the practice section.</p>',
+        choices: [' '],
+        // Ensure audio context is running
+        on_finish: function () {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+    };
+
+    // Define practice audio trial
+    var practice_sound = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Listening...</p>',
+        choices: "NO_KEYS",
+        trial_duration: 5000,
+
+        on_start: function (trial) {
+            // Ensure audio context is running
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Get next practice sentence object and babble track
+            const sentenceObj = practiceSentences.pop();
+            const babblePath = `sound/babble/SNR${maxSNR}dB.wav`;
+
+            // Load and play audio buffers
+            Promise.all([
+                loadAudioBuffer(sentenceObj.path),
+                loadAudioBuffer(babblePath)
+            ]).then(function (buffers) {
+                const speechSource = audioCtx.createBufferSource();
+                const babbleSource = audioCtx.createBufferSource();
+
+                speechSource.buffer = buffers[0];
+                babbleSource.buffer = buffers[1];
+
+                speechSource.connect(audioCtx.destination);
+                babbleSource.connect(audioCtx.destination);
+
+                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
+                const startTime = audioCtx.currentTime + 0.5;
+                babbleSource.start(startTime);
+                speechSource.start(startTime + 1.0);
+                babbleSource.stop(startTime + 1.0 + speechSource.buffer.duration + 1.0);
+            });
+        }
+    };
+
+    // Define practice response question
+    var practice_question = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: "Enter the words you heard in the audio:", name: 'response' }
+        ],
+        on_finish: function (data) {
+            // No scoring or SNR adjustment in practice
+            const userResponse = data.response.response.trim().toLowerCase();
+            data.user_response = userResponse;
+        }
+    };
+
+    // Define practice procedure
+    var practice_procedure = {
+        timeline: [practice_sound, practice_question],
+        repetitions: 3
+    };
+
+    practice_block.push(practice_start_trial);
+    practice_block.push(practice_procedure);
+
     /*********************************************************************************/
     /******************************* Experiment Block ********************************/
     /*********************************************************************************/
@@ -363,11 +438,11 @@
 
     // Run the experiment
     Promise.all([
-        prepareSentences("configFiles/practice_sentences.json", false),  // unshuffled practice sentences
-        prepareSentences("configFiles/hint_sentence_lists.json", true),  // shuffled main sentences
-    ]).then(([mainSentences, practiceSents]) => {
-        sentencePool = mainSentences;
+        prepareSentences("configFiles/hint_practice_list.json", false),  // unshuffled practice sentences first
+        prepareSentences("configFiles/hint_sentence_lists.json", true)   // shuffled main sentences
+    ]).then(([practiceSents, mainSentences]) => {
         practiceSentences = practiceSents;
+        sentencePool = mainSentences;
         jsPsych.run(timeline);
     });
 
