@@ -210,7 +210,7 @@
             <p>You have completed the practice section.</p>
             <p>Now, the main experiment will begin.</p>
             <p>Your task remains the same: listen to each sentence with background noise and type out the words you hear.</p>
-            <p>There will be a total of 13 sentences in this section.</p>
+            <p>There will be a total of 15 sentences in this section.</p>
             <p>The background noise level will adjust based on your performance.</p>
             <p>Press 'Next' to start the main experiment.</p>`
         ],
@@ -404,11 +404,11 @@
     // Define experiment procedure
     var exp_procedure = {
         timeline: [exp_sound, exp_question],
-        repetitions: 13,
+        repetitions: 15,
         on_timeline_finish: function () {
-            // Calculate average SNR over last 5 trials
+            // Calculate average SNR over last 10 trials
             const snrData = jsPsych.data.get().filterCustom(d => Number.isFinite(d.SNR));
-            const snrValues = snrData.last(5).select('SNR').values;
+            const snrValues = snrData.last(10).select('SNR').values;
             const avgSNR = snrValues.length
                 ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
                 : null;
