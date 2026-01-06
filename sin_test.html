@@ -298,11 +298,16 @@
                 speechSource.connect(audioCtx.destination);
                 babbleSource.connect(audioCtx.destination);
 
+                // Calculate random offset for babble to start at different positions
+                const babbleDuration = babbleSource.buffer.duration;
+                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
+                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
+                const randomOffset = Math.random() * maxOffset;
+
                 // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
                 const startTime = audioCtx.currentTime + 0.5;
-                babbleSource.start(startTime);
+                babbleSource.start(startTime, randomOffset, requiredDuration);
                 speechSource.start(startTime + 1.0);
-                babbleSource.stop(startTime + 1.0 + speechSource.buffer.duration + 1.0);
             });
         }
     };
@@ -383,11 +388,16 @@
                 speechSource.connect(audioCtx.destination);
                 babbleSource.connect(audioCtx.destination);
 
+                // Calculate random offset for babble to start at different positions
+                const babbleDuration = babbleSource.buffer.duration;
+                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
+                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
+                const randomOffset = Math.random() * maxOffset;
+
                 // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
                 const startTime = audioCtx.currentTime + 0.5;
-                babbleSource.start(startTime);
+                babbleSource.start(startTime, randomOffset, requiredDuration);
                 speechSource.start(startTime + 1.0);
-                babbleSource.stop(startTime + 1.0 + speechSource.buffer.duration + 1.0);
             });
         },
 
