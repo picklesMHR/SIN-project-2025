@@ -26,8 +26,10 @@
     currentSNR = maxSNR;
     stepSize = 2; // dB
     var currentSentenceData = null; // Store current sentence object globally
-    var sentencePool = []; // Pool of sentences to draw from
     var practiceSentences = []; // Pool of practice sentences
+    var pretestSentences = []; // Pool of pretest sentences
+    var trainingSentences = []; // Pool of training sentences
+    var posttestSentences = []; // Pool of posttest sentences
 
     /*********************************************************************************/
     /******************************* Global Functions ********************************/
@@ -72,12 +74,12 @@
         return shuffle ? shuffleArray(allSentences) : allSentences;
     }
 
-    // Function to get next sentence
-    function getNextSentence() {
-        if (sentencePool.length === 0) {
+    // Function to get next sentence from a specific pool
+    function getNextSentence(pool) {
+        if (pool.length === 0) {
             return null;
         }
-        return sentencePool.pop();
+        return pool.pop();
     }
 
     /** Scoring functions for HINT responses **/
@@ -154,11 +156,17 @@
         continue_after_error: true,
         audio: function () {
             let audioFiles = [];
-            // Load all practice and main sentence audio files
+            // Load all practice, pretest, training, and posttest sentence audio files
             practiceSentences.forEach(sentence => {
                 audioFiles.push(sentence.path);
             });
-            sentencePool.forEach(sentence => {
+            pretestSentences.forEach(sentence => {
+                audioFiles.push(sentence.path);
+            });
+            trainingSentences.forEach(sentence => {
+                audioFiles.push(sentence.path);
+            });
+            posttestSentences.forEach(sentence => {
                 audioFiles.push(sentence.path);
             });
             // Load all babble SNR levels
@@ -233,16 +241,44 @@
         show_clickable_nav: true
     }
 
-    var experiment_instructions_block = {
+    var pretest_instructions_block = {
         type: jsPsychInstructions,
         pages: [
             `<h2>Practice Complete</h2>
             <p>You have completed the practice section.</p>
-            <p>Now, the main experiment will begin.</p>
+            <p>Now, the pre-test will begin.</p>
             <p>Your task remains the same: listen to each sentence with background noise and type out the words you hear.</p>
             <p>There will be a total of 15 sentences in this section.</p>
             <p>The background noise level will adjust based on your performance.</p>
-            <p>Press 'Next' to start the main experiment.</p>`
+            <p>Press 'Next' to start the pre-test.</p>`
+        ],
+        show_clickable_nav: true
+    }
+
+    var training_instructions_block = {
+        type: jsPsychInstructions,
+        pages: [
+            `<h2>Pre-test Complete</h2>
+            <p>You have completed the pre-test section.</p>
+            <p>Now, you will begin the training phase.</p>
+            <p>This section will take approximately 20 minutes.</p>
+            <p>Continue to listen to each sentence with background noise and type out the words you hear.</p>
+            <p>The background noise level will continue to adjust based on your performance.</p>
+            <p>Press 'Next' to start the training phase.</p>`
+        ],
+        show_clickable_nav: true
+    }
+
+    var posttest_instructions_block = {
+        type: jsPsychInstructions,
+        pages: [
+            `<h2>Training Complete</h2>
+            <p>You have completed the training phase.</p>
+            <p>Now, the final post-test will begin.</p>
+            <p>Your task remains the same: listen to each sentence with background noise and type out the words you hear.</p>
+            <p>There will be a total of 15 sentences in this final section.</p>
+            <p>The background noise level will adjust based on your performance.</p>
+            <p>Press 'Next' to start the post-test.</p>`
         ],
         show_clickable_nav: true
     }
@@ -335,27 +371,28 @@
     practice_block.push(practice_procedure);
 
     /*********************************************************************************/
-    /******************************* Experiment Block ********************************/
+    /********************************* Pretest Block *********************************/
     /*********************************************************************************/
 
-    // Define experiment block
-    var exp_block = [];
+    // Define pretest block
+    var pretest_block = [];
 
-    // Simple start trial to begin experiment
-    var start_trial = {
+    // Simple start trial to begin pretest
+    var pretest_start_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>Press space to start the audio test.</p>',
+        stimulus: '<p>Press space to start the pre-test.</p>',
         choices: [' '],
-        // Ensure audio context is running
         on_finish: function () {
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+            // Reset SNR for pretest
+            currentSNR = maxSNR;
         }
     };
 
-    // Define audio trial
-    var exp_sound = {
+    // Define pretest audio trial
+    var pretest_sound = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: '<p>Listening...</p>',
         choices: "NO_KEYS",
@@ -368,7 +405,7 @@
             }
 
             // Get next sentence object and babble track
-            const sentenceObj = getNextSentence();
+            const sentenceObj = getNextSentence(pretestSentences);
             const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
 
             // Store globally for data recording
@@ -404,6 +441,7 @@
         // Store data for each trial
         on_finish: function (data) {
             const sentenceData = currentSentenceData || {};
+            data.phase = 'pretest';
             data.sentence_path = sentenceData.path || '';
             data.sentence_id = sentenceData.id || '';
             data.sentence_text = sentenceData.text || '';
@@ -412,8 +450,8 @@
         }
     };
 
-    // Define response question
-    var exp_question = {
+    // Define pretest response question
+    var pretest_question = {
         type: jsPsychSurveyText,
         questions: [
             { prompt: "Enter the words you heard in the audio:", name: 'response' }
@@ -425,6 +463,7 @@
 
             const score = scoreHintResponse(expectedSentence, userResponse);
 
+            data.phase = 'pretest';
             data.user_response = userResponse;
             data.expected_sentence = expectedSentence;
             data.words_correct = score.correct;
@@ -441,23 +480,270 @@
         }
     };
 
-    // Define experiment procedure
-    var exp_procedure = {
-        timeline: [exp_sound, exp_question],
+    // Define pretest procedure
+    var pretest_procedure = {
+        timeline: [pretest_sound, pretest_question],
         repetitions: 15,
         on_timeline_finish: function () {
             // Calculate average SNR over last 10 trials
-            const snrData = jsPsych.data.get().filterCustom(d => Number.isFinite(d.SNR));
+            const snrData = jsPsych.data.get().filterCustom(d => d.phase === 'pretest' && Number.isFinite(d.SNR));
             const snrValues = snrData.last(10).select('SNR').values;
             const avgSNR = snrValues.length
                 ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
                 : null;
-            jsPsych.data.addDataToLastTrial({ SNR_50: avgSNR });
+            jsPsych.data.addDataToLastTrial({ pretest_SNR_50: avgSNR });
         }
     };
 
-    exp_block.push(start_trial);
-    exp_block.push(exp_procedure);
+    pretest_block.push(pretest_start_trial);
+    pretest_block.push(pretest_procedure);
+
+    /*********************************************************************************/
+    /******************************** Training Block *********************************/
+    /*********************************************************************************/
+
+    // Define training block
+    var training_block = [];
+
+    // Simple start trial to begin training
+    var training_start_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Press space to start the training phase.</p>',
+        choices: [' '],
+        on_finish: function () {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // Reset SNR for training
+            currentSNR = maxSNR;
+        }
+    };
+
+    // Define training audio trial
+    var training_sound = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Listening...</p>',
+        choices: "NO_KEYS",
+        trial_duration: 5000,
+
+        on_start: function (trial) {
+            // Ensure audio context is running
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Get next sentence object and babble track
+            const sentenceObj = getNextSentence(trainingSentences);
+            const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
+
+            // Store globally for data recording
+            currentSentenceData = sentenceObj;
+
+            // Load and play audio buffers
+            Promise.all([
+                loadAudioBuffer(sentenceObj.path),
+                loadAudioBuffer(babblePath)
+            ]).then(function (buffers) {
+                const speechSource = audioCtx.createBufferSource();
+                const babbleSource = audioCtx.createBufferSource();
+
+                speechSource.buffer = buffers[0];
+                babbleSource.buffer = buffers[1];
+
+                speechSource.connect(audioCtx.destination);
+                babbleSource.connect(audioCtx.destination);
+
+                // Calculate random offset for babble to start at different positions
+                const babbleDuration = babbleSource.buffer.duration;
+                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
+                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
+                const randomOffset = Math.random() * maxOffset;
+
+                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
+                const startTime = audioCtx.currentTime + 0.5;
+                babbleSource.start(startTime, randomOffset, requiredDuration);
+                speechSource.start(startTime + 1.0);
+            });
+        },
+
+        // Store data for each trial
+        on_finish: function (data) {
+            const sentenceData = currentSentenceData || {};
+            data.phase = 'training';
+            data.sentence_path = sentenceData.path || '';
+            data.sentence_id = sentenceData.id || '';
+            data.sentence_text = sentenceData.text || '';
+            data.list_id = sentenceData.listId || '';
+            data.SNR = currentSNR;
+        }
+    };
+
+    // Define training response question
+    var training_question = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: "Enter the words you heard in the audio:", name: 'response' }
+        ],
+        on_finish: function (data) {
+            // Score response correctness
+            const userResponse = data.response.response.trim().toLowerCase();
+            const expectedSentence = currentSentenceData.text;
+
+            const score = scoreHintResponse(expectedSentence, userResponse);
+
+            data.phase = 'training';
+            data.user_response = userResponse;
+            data.expected_sentence = expectedSentence;
+            data.words_correct = score.correct;
+            data.words_total = score.total;
+            data.proportion_correct = score.proportion;
+            data.score_details = score.details;
+
+            // Adjust SNR based on correctness
+            if (score.proportion === 1.0) {
+                currentSNR = Math.max(currentSNR - stepSize, minSNR);
+            } else {
+                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
+            }
+        }
+    };
+
+    // Define training procedure (approximately 20 minutes, ~40 trials at ~30 sec/trial)
+    var training_procedure = {
+        timeline: [training_sound, training_question],
+        repetitions: 40
+    };
+
+    training_block.push(training_start_trial);
+    training_block.push(training_procedure);
+
+    /*********************************************************************************/
+    /******************************** Posttest Block *********************************/
+    /*********************************************************************************/
+
+    // Define posttest block
+    var posttest_block = [];
+
+    // Simple start trial to begin posttest
+    var posttest_start_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Press space to start the post-test.</p>',
+        choices: [' '],
+        on_finish: function () {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // Reset SNR for posttest
+            currentSNR = maxSNR;
+        }
+    };
+
+    // Define posttest audio trial
+    var posttest_sound = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Listening...</p>',
+        choices: "NO_KEYS",
+        trial_duration: 5000,
+
+        on_start: function (trial) {
+            // Ensure audio context is running
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Get next sentence object and babble track
+            const sentenceObj = getNextSentence(posttestSentences);
+            const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
+
+            // Store globally for data recording
+            currentSentenceData = sentenceObj;
+
+            // Load and play audio buffers
+            Promise.all([
+                loadAudioBuffer(sentenceObj.path),
+                loadAudioBuffer(babblePath)
+            ]).then(function (buffers) {
+                const speechSource = audioCtx.createBufferSource();
+                const babbleSource = audioCtx.createBufferSource();
+
+                speechSource.buffer = buffers[0];
+                babbleSource.buffer = buffers[1];
+
+                speechSource.connect(audioCtx.destination);
+                babbleSource.connect(audioCtx.destination);
+
+                // Calculate random offset for babble to start at different positions
+                const babbleDuration = babbleSource.buffer.duration;
+                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
+                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
+                const randomOffset = Math.random() * maxOffset;
+
+                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
+                const startTime = audioCtx.currentTime + 0.5;
+                babbleSource.start(startTime, randomOffset, requiredDuration);
+                speechSource.start(startTime + 1.0);
+            });
+        },
+
+        // Store data for each trial
+        on_finish: function (data) {
+            const sentenceData = currentSentenceData || {};
+            data.phase = 'posttest';
+            data.sentence_path = sentenceData.path || '';
+            data.sentence_id = sentenceData.id || '';
+            data.sentence_text = sentenceData.text || '';
+            data.list_id = sentenceData.listId || '';
+            data.SNR = currentSNR;
+        }
+    };
+
+    // Define posttest response question
+    var posttest_question = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: "Enter the words you heard in the audio:", name: 'response' }
+        ],
+        on_finish: function (data) {
+            // Score response correctness
+            const userResponse = data.response.response.trim().toLowerCase();
+            const expectedSentence = currentSentenceData.text;
+
+            const score = scoreHintResponse(expectedSentence, userResponse);
+
+            data.phase = 'posttest';
+            data.user_response = userResponse;
+            data.expected_sentence = expectedSentence;
+            data.words_correct = score.correct;
+            data.words_total = score.total;
+            data.proportion_correct = score.proportion;
+            data.score_details = score.details;
+
+            // Adjust SNR based on correctness
+            if (score.proportion === 1.0) {
+                currentSNR = Math.max(currentSNR - stepSize, minSNR);
+            } else {
+                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
+            }
+        }
+    };
+
+    // Define posttest procedure
+    var posttest_procedure = {
+        timeline: [posttest_sound, posttest_question],
+        repetitions: 15,
+        on_timeline_finish: function () {
+            // Calculate average SNR over last 10 trials
+            const snrData = jsPsych.data.get().filterCustom(d => d.phase === 'posttest' && Number.isFinite(d.SNR));
+            const snrValues = snrData.last(10).select('SNR').values;
+            const avgSNR = snrValues.length
+                ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
+                : null;
+            jsPsych.data.addDataToLastTrial({ posttest_SNR_50: avgSNR });
+        }
+    };
+
+    posttest_block.push(posttest_start_trial);
+    posttest_block.push(posttest_procedure);
 
     /*********************************************************************************/
     /******************************** Build Timeline *********************************/
@@ -470,8 +756,12 @@
     timeline = timeline.concat(sound_check_procedure);
     timeline = timeline.concat(practice_instructions_block);
     timeline = timeline.concat(practice_block);
-    timeline = timeline.concat(experiment_instructions_block);
-    timeline = timeline.concat(exp_block);
+    timeline = timeline.concat(pretest_instructions_block);
+    timeline = timeline.concat(pretest_block);
+    timeline = timeline.concat(training_instructions_block);
+    timeline = timeline.concat(training_block);
+    timeline = timeline.concat(posttest_instructions_block);
+    timeline = timeline.concat(posttest_block);
 
     /*********************************************************************************/
     /********************************** Run jsPsych **********************************/
@@ -479,11 +769,15 @@
 
     // Run the experiment
     Promise.all([
-        prepareSentences("configFiles/hint_practice_list.json", false),  // unshuffled practice sentences first
-        prepareSentences("configFiles/hint_sentence_lists.json", true)   // shuffled main sentences
-    ]).then(([practiceSents, mainSentences]) => {
+        prepareSentences("configFiles/hint_practice_list.json", false),  // unshuffled practice sentences
+        prepareSentences("configFiles/hint_sentence_lists.json", true),  // shuffled pretest sentences
+        prepareSentences("configFiles/hint_sentence_lists.json", true),  // shuffled training sentences
+        prepareSentences("configFiles/hint_sentence_lists.json", true)   // shuffled posttest sentences
+    ]).then(([practiceSents, pretestSents, trainingSents, posttestSents]) => {
         practiceSentences = practiceSents;
-        sentencePool = mainSentences;
+        pretestSentences = pretestSents;
+        trainingSentences = trainingSents;
+        posttestSentences = posttestSents;
         jsPsych.run(timeline);
     });
 
