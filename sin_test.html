@@ -360,6 +360,18 @@
         show_clickable_nav: true
     }
 
+    var debriefing_block = {
+        type: jsPsychInstructions,
+        pages: [
+            `<h2>Thank You!</h2>
+            <p>You have completed the speech-in-noise listening comprehension study.</p>
+            <p>Your participation is greatly appreciated and will contribute to our understanding of how auditory processing training affects speech comprehension in noise for L2 English learners.</p>
+            <p>Your data has been securely recorded. If you have any questions about this study or your results, please contact the research team.</p>
+            <p>Thank you for your time and effort!</p>`
+        ],
+        show_clickable_nav: false
+    };
+
     /*********************************************************************************/
     /******************************** Practice Block *********************************/
     /*********************************************************************************/
@@ -766,14 +778,15 @@
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
     timeline = timeline.concat(sound_check_procedure);
-    // timeline = timeline.concat(practice_instructions_block);
-    // timeline = timeline.concat(practice_block);
-    // timeline = timeline.concat(pretest_instructions_block);
-    // timeline = timeline.concat(pretest_block);
+    timeline = timeline.concat(practice_instructions_block);
+    timeline = timeline.concat(practice_block);
+    timeline = timeline.concat(pretest_instructions_block);
+    timeline = timeline.concat(pretest_block);
     timeline = timeline.concat(training_instructions_block);
     timeline = timeline.concat(training_block);
     timeline = timeline.concat(posttest_instructions_block);
     timeline = timeline.concat(posttest_block);
+    timeline = timeline.concat(debriefing_block);
 
     /*********************************************************************************/
     /********************************** Run jsPsych **********************************/
