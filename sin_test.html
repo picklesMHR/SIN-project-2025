@@ -151,9 +151,9 @@
     var preload = {
         type: jsPsychPreload,
         continue_after_error: true,
-        audio: (function () {
+        audio: function () {
             let audioFiles = [];
-            // Load all sentence audio files
+            // Load all practice and main sentence audio files
             practiceSentences.forEach(sentence => {
                 audioFiles.push(sentence.path);
             });
@@ -165,7 +165,7 @@
                 audioFiles.push(`sound/babble/SNR${snr}dB.wav`);
             }
             return audioFiles;
-        })()
+        }
     };
 
     /*********************************************************************************/
