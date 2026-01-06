@@ -26,6 +26,7 @@
     stepSize = 2; // dB
     var currentSentenceData = null; // Store current sentence object globally
     var sentencePool = []; // Pool of sentences to draw from
+    var practiceSentences = []; // Pool of practice sentences
 
     /*********************************************************************************/
     /******************************* Global Functions ********************************/
@@ -50,10 +51,10 @@
         return arr;
     }
 
-    // Function to prepare randomised sentence pool
-    async function prepareSentences() {
+    // Function to prepare sentence pool
+    async function prepareSentences(configPath, shuffle) {
         // Load sentence list JSON
-        const response = await fetch("configFiles/hint_sentence_lists.json");
+        const response = await fetch(configPath);
         const config = await response.json();
 
         // Flatten sentences
@@ -66,8 +67,8 @@
             }))
         );
 
-        // Shuffle sentences to create pool
-        sentencePool = shuffleArray(allSentences);
+        // Return shuffled or unshuffled sentences
+        return shuffle ? shuffleArray(allSentences) : allSentences;
     }
 
     // Function to get next sentence
@@ -153,6 +154,9 @@
         audio: (function () {
             let audioFiles = [];
             // Load all sentence audio files
+            practiceSentences.forEach(sentence => {
+                audioFiles.push(sentence.path);
+            });
             sentencePool.forEach(sentence => {
                 audioFiles.push(sentence.path);
             });
@@ -217,7 +221,8 @@
     /******************************** Practice Block *********************************/
     /*********************************************************************************/
 
-
+    // Define practice block
+    var practice_block = [];
 
     /*********************************************************************************/
     /******************************* Experiment Block ********************************/
@@ -348,6 +353,7 @@
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
     timeline = timeline.concat(practice_instructions_block);
+    timeline = timeline.concat(practice_block);
     timeline = timeline.concat(experiment_instructions_block);
     timeline = timeline.concat(exp_block);
 
@@ -356,7 +362,12 @@
     /*********************************************************************************/
 
     // Run the experiment
-    prepareSentences().then(() => {
+    Promise.all([
+        prepareSentences("configFiles/practice_sentences.json", false),  // unshuffled practice sentences
+        prepareSentences("configFiles/hint_sentence_lists.json", true),  // shuffled main sentences
+    ]).then(([mainSentences, practiceSents]) => {
+        sentencePool = mainSentences;
+        practiceSentences = practiceSents;
         jsPsych.run(timeline);
     });
 
