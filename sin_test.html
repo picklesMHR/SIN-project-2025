@@ -26,8 +26,8 @@
     currentSNR = maxSNR;
     stepSize = 2; // dB
     var currentSentenceData = null; // Store current sentence object globally
-    var currentTrainingScore = null; // Store training trial score for feedback
     var currentTrainingResponse = null; // Store training response for feedback
+    var firstAttemptScore = null; // Store first attempt score for SNR adjustment
     var practiceSentences = []; // Pool of practice sentences
     var pretestSentences = []; // Pool of pretest sentences
     var trainingSentences = []; // Pool of training sentences
@@ -174,6 +174,45 @@
         feedbackHTML += '</div>';
 
         return feedbackHTML;
+    }
+
+    // Function to play audio with babble at specified SNR
+    function playAudioWithBabble(speechPath, snrLevel) {
+        const babblePath = `sound/babble/SNR${snrLevel}dB.wav`;
+
+        // Load and play audio buffers
+        Promise.all([
+            loadAudioBuffer(speechPath),
+            loadAudioBuffer(babblePath)
+        ]).then(function (buffers) {
+            const speechSource = audioCtx.createBufferSource();
+            const babbleSource = audioCtx.createBufferSource();
+
+            speechSource.buffer = buffers[0];
+            babbleSource.buffer = buffers[1];
+
+            speechSource.connect(audioCtx.destination);
+            babbleSource.connect(audioCtx.destination);
+
+            // Calculate random offset for babble to start at different positions
+            const babbleDuration = babbleSource.buffer.duration;
+            const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0;
+            const maxOffset = Math.max(0, babbleDuration - requiredDuration);
+            const randomOffset = Math.random() * maxOffset;
+
+            // Synchronise start/stop times
+            const startTime = audioCtx.currentTime + 0.5;
+            babbleSource.start(startTime, randomOffset, requiredDuration);
+            speechSource.start(startTime + 1.0);
+        });
+    }
+
+    // Function to play replay audio
+    function playReplayAudio() {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        playAudioWithBabble(currentSentenceData.path, currentSNR);
     }
 
     /*********************************************************************************/
@@ -354,35 +393,9 @@
                 audioCtx.resume();
             }
 
-            // Get next practice sentence object and babble track
+            // Get next practice sentence object
             const sentenceObj = practiceSentences.pop();
-            const babblePath = `sound/babble/SNR${maxSNR}dB.wav`;
-
-            // Load and play audio buffers
-            Promise.all([
-                loadAudioBuffer(sentenceObj.path),
-                loadAudioBuffer(babblePath)
-            ]).then(function (buffers) {
-                const speechSource = audioCtx.createBufferSource();
-                const babbleSource = audioCtx.createBufferSource();
-
-                speechSource.buffer = buffers[0];
-                babbleSource.buffer = buffers[1];
-
-                speechSource.connect(audioCtx.destination);
-                babbleSource.connect(audioCtx.destination);
-
-                // Calculate random offset for babble to start at different positions
-                const babbleDuration = babbleSource.buffer.duration;
-                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
-                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
-                const randomOffset = Math.random() * maxOffset;
-
-                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
-                const startTime = audioCtx.currentTime + 0.5;
-                babbleSource.start(startTime, randomOffset, requiredDuration);
-                speechSource.start(startTime + 1.0);
-            });
+            playAudioWithBabble(sentenceObj.path, maxSNR);
         }
     };
 
@@ -442,38 +455,13 @@
                 audioCtx.resume();
             }
 
-            // Get next sentence object and babble track
+            // Get next sentence object
             const sentenceObj = getNextSentence(pretestSentences);
-            const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
 
             // Store globally for data recording
             currentSentenceData = sentenceObj;
 
-            // Load and play audio buffers
-            Promise.all([
-                loadAudioBuffer(sentenceObj.path),
-                loadAudioBuffer(babblePath)
-            ]).then(function (buffers) {
-                const speechSource = audioCtx.createBufferSource();
-                const babbleSource = audioCtx.createBufferSource();
-
-                speechSource.buffer = buffers[0];
-                babbleSource.buffer = buffers[1];
-
-                speechSource.connect(audioCtx.destination);
-                babbleSource.connect(audioCtx.destination);
-
-                // Calculate random offset for babble to start at different positions
-                const babbleDuration = babbleSource.buffer.duration;
-                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
-                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
-                const randomOffset = Math.random() * maxOffset;
-
-                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
-                const startTime = audioCtx.currentTime + 0.5;
-                babbleSource.start(startTime, randomOffset, requiredDuration);
-                speechSource.start(startTime + 1.0);
-            });
+            playAudioWithBabble(sentenceObj.path, currentSNR);
         },
 
         // Store data for each trial
@@ -570,38 +558,11 @@
                 audioCtx.resume();
             }
 
-            // Get next sentence object and babble track
+            // Get next sentence object
             const sentenceObj = getNextSentence(trainingSentences);
-            const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
-
-            // Store globally for data recording
             currentSentenceData = sentenceObj;
 
-            // Load and play audio buffers
-            Promise.all([
-                loadAudioBuffer(sentenceObj.path),
-                loadAudioBuffer(babblePath)
-            ]).then(function (buffers) {
-                const speechSource = audioCtx.createBufferSource();
-                const babbleSource = audioCtx.createBufferSource();
-
-                speechSource.buffer = buffers[0];
-                babbleSource.buffer = buffers[1];
-
-                speechSource.connect(audioCtx.destination);
-                babbleSource.connect(audioCtx.destination);
-
-                // Calculate random offset for babble to start at different positions
-                const babbleDuration = babbleSource.buffer.duration;
-                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
-                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
-                const randomOffset = Math.random() * maxOffset;
-
-                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
-                const startTime = audioCtx.currentTime + 0.5;
-                babbleSource.start(startTime, randomOffset, requiredDuration);
-                speechSource.start(startTime + 1.0);
-            });
+            playAudioWithBabble(currentSentenceData.path, currentSNR);
         },
 
         // Store data for each trial
@@ -629,9 +590,9 @@
 
             const score = scoreHintResponse(expectedSentence, userResponse);
 
-            // Store training data globally for feedback trial
-            currentTrainingScore = score;
+            // Store for feedback trial
             currentTrainingResponse = userResponse;
+            firstAttemptScore = score;
 
             data.phase = 'training';
             data.user_response = userResponse;
@@ -641,12 +602,7 @@
             data.proportion_correct = score.proportion;
             data.score_details = score.details;
 
-            // Adjust SNR based on correctness
-            if (score.proportion === 1.0) {
-                currentSNR = Math.max(currentSNR - stepSize, minSNR);
-            } else {
-                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
-            }
+            // Don't adjust SNR yet - wait to see if they replay
         }
     };
 
@@ -654,13 +610,39 @@
     var training_feedback = {
         type: jsPsychHtmlButtonResponse,
         stimulus: function () {
-            return generateFeedbackHTML(
+            let feedbackHTML = generateFeedbackHTML(
                 currentSentenceData.text,
                 currentTrainingResponse,
-                currentTrainingScore
+                firstAttemptScore
             );
+            // Add replay button only if score was incorrect
+            if (firstAttemptScore.proportion < 1.0) {
+                feedbackHTML = feedbackHTML.replace('</div>', 
+                    `<p style="margin-top: 20px;"><button id="replayBtn" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Replay Audio</button></p></div>`);
+            }
+            return feedbackHTML;
         },
-        choices: ['Continue']
+        choices: ['Continue'],
+        on_load: function () {
+            // Add click handler for replay button if it exists
+            const replayBtn = document.getElementById('replayBtn');
+            if (replayBtn) {
+                replayBtn.onclick = function (e) {
+                    e.preventDefault();
+                    playReplayAudio();
+                };
+            }
+        },
+        on_finish: function (data) {
+            // Adjust SNR based on FIRST attempt score
+            if (firstAttemptScore.proportion === 1.0) {
+                currentSNR = Math.max(currentSNR - stepSize, minSNR);
+            } else {
+                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
+            }
+            // Reset first attempt score for next sentence
+            firstAttemptScore = null;
+        }
     };
 
     // Define training procedure (approximately 20 minutes, ~40 trials at ~30 sec/trial)
@@ -706,38 +688,13 @@
                 audioCtx.resume();
             }
 
-            // Get next sentence object and babble track
+            // Get next sentence object
             const sentenceObj = getNextSentence(posttestSentences);
-            const babblePath = `sound/babble/SNR${currentSNR}dB.wav`;
 
             // Store globally for data recording
             currentSentenceData = sentenceObj;
 
-            // Load and play audio buffers
-            Promise.all([
-                loadAudioBuffer(sentenceObj.path),
-                loadAudioBuffer(babblePath)
-            ]).then(function (buffers) {
-                const speechSource = audioCtx.createBufferSource();
-                const babbleSource = audioCtx.createBufferSource();
-
-                speechSource.buffer = buffers[0];
-                babbleSource.buffer = buffers[1];
-
-                speechSource.connect(audioCtx.destination);
-                babbleSource.connect(audioCtx.destination);
-
-                // Calculate random offset for babble to start at different positions
-                const babbleDuration = babbleSource.buffer.duration;
-                const requiredDuration = 1.0 + speechSource.buffer.duration + 1.0; // intro + speech + trailer
-                const maxOffset = Math.max(0, babbleDuration - requiredDuration);
-                const randomOffset = Math.random() * maxOffset;
-
-                // Synchronise start/stop times: 500 ms silence -> 1000 ms babble -> target speech -> 1000 ms babble trailer
-                const startTime = audioCtx.currentTime + 0.5;
-                babbleSource.start(startTime, randomOffset, requiredDuration);
-                speechSource.start(startTime + 1.0);
-            });
+            playAudioWithBabble(sentenceObj.path, currentSNR);
         },
 
         // Store data for each trial
