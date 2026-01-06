@@ -20,11 +20,11 @@
     /******************************* Global Variables ********************************/
     /*********************************************************************************/
 
-    participant_id = ''; // Participant ID
-    maxSNR = 12; // dB
-    minSNR = -4; // dB
-    currentSNR = maxSNR;
-    stepSize = 2; // dB
+    var participant_id = ''; // Participant ID
+    var maxSNR = 12; // dB
+    var minSNR = -4; // dB
+    var currentSNR = maxSNR; // Start at max SNR
+    var stepSize = 2; // dB
     var currentSentenceData = null; // Store current sentence object globally
     var currentTrainingResponse = null; // Store training response for feedback
     var firstAttemptScore = null; // Store first attempt score for SNR adjustment
@@ -40,6 +40,7 @@
     // Audio setup
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    // Function to load audio buffer
     function loadAudioBuffer(url) {
         return fetch(url)
             .then(response => response.arrayBuffer())
@@ -97,9 +98,11 @@
 
     // Expand "(A/The) boy (is/was) here" → [["a","the"],["boy"],["is","was"],["here"]]
     function expandSentence(rawSentence) {
+        // Split sentence into tokens
         const tokens = rawSentence.split(" ");
         const expanded = [];
 
+        // Process each token
         tokens.forEach(token => {
             if (token.startsWith("(") && token.endsWith(")")) {
                 const opts = token
@@ -117,13 +120,16 @@
 
     // Score user response against expected sentence
     function scoreHintResponse(rawSentence, userResponse) {
+        // Expand expected sentence and normalise user response
         const expected = expandSentence(rawSentence);
         const responseWords = normalise(userResponse).split(" ");
         const usedIndices = new Set(); // Track which response words have been used
 
+        // Initialize scoring variables
         let correct = 0;
         let total = expected.length;
 
+        // Check each expected position for matches
         const details = expected.map((options, i) => {
             let match = false;
             // Check if any unused response word matches this expected position
@@ -232,25 +238,21 @@
         type: jsPsychPreload,
         continue_after_error: true,
         audio: function () {
-            let audioFiles = [];
-            // Load all practice, pretest, training, and posttest sentence audio files
-            practiceSentences.forEach(sentence => {
-                audioFiles.push(sentence.path);
-            });
-            pretestSentences.forEach(sentence => {
-                audioFiles.push(sentence.path);
-            });
-            trainingSentences.forEach(sentence => {
-                audioFiles.push(sentence.path);
-            });
-            posttestSentences.forEach(sentence => {
-                audioFiles.push(sentence.path);
-            });
-            // Load all babble SNR levels
+            // Combine all sentence pools and extract paths
+            const sentencePaths = [
+                ...practiceSentences,
+                ...pretestSentences,
+                ...trainingSentences,
+                ...posttestSentences
+            ].map(sentence => sentence.path);
+
+            // Generate babble file paths
+            const babblePaths = [];
             for (let snr = minSNR; snr <= maxSNR; snr += stepSize) {
-                audioFiles.push(`sound/babble/SNR${snr}dB.wav`);
+                babblePaths.push(`sound/babble/SNR${snr}dB.wav`);
             }
-            return audioFiles;
+
+            return [...sentencePaths, ...babblePaths];
         }
     };
 
@@ -271,6 +273,7 @@
     /******************************* Sound Check Block *******************************/
     /*********************************************************************************/
 
+    // Define sound check block
     var sound_check = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h2>Sound Check</h2>
@@ -283,6 +286,7 @@
                 if (audioCtx.state === 'suspended') {
                     await audioCtx.resume();
                 }
+                // Load and play test sound
                 const buffer = await loadAudioBuffer('sound/speech/L00_S01.wav');
                 const testSource = audioCtx.createBufferSource();
                 testSource.buffer = buffer;
@@ -292,6 +296,7 @@
         }
     };
 
+    // Define sound check procedure with loop
     var sound_check_procedure = {
         timeline: [sound_check],
         loop_function: function (data) {
@@ -306,6 +311,7 @@
     /****************************** Instructions Block *******************************/
     /*********************************************************************************/
 
+    // Define practice instructions block
     var practice_instructions_block = {
         type: jsPsychInstructions,
         pages: [
@@ -316,8 +322,9 @@
             <p>Press 'Next' to begin the practice section.</p>`
         ],
         show_clickable_nav: true
-    }
+    };
 
+    // Define pretest instructions block
     var pretest_instructions_block = {
         type: jsPsychInstructions,
         pages: [
@@ -330,8 +337,9 @@
             <p>Press 'Next' to start the pre-test.</p>`
         ],
         show_clickable_nav: true
-    }
+    };
 
+    // Define training instructions block
     var training_instructions_block = {
         type: jsPsychInstructions,
         pages: [
@@ -344,8 +352,9 @@
             <p>Press 'Next' to start the training phase.</p>`
         ],
         show_clickable_nav: true
-    }
+    };
 
+    // Define posttest instructions block
     var posttest_instructions_block = {
         type: jsPsychInstructions,
         pages: [
@@ -358,8 +367,9 @@
             <p>Press 'Next' to start the post-test.</p>`
         ],
         show_clickable_nav: true
-    }
+    };
 
+    // Define debriefing block
     var debriefing_block = {
         type: jsPsychInstructions,
         pages: [
@@ -407,6 +417,7 @@
 
             // Get next practice sentence object
             const sentenceObj = practiceSentences.pop();
+
             playAudioWithBabble(sentenceObj.path, maxSNR);
         }
     };
@@ -498,9 +509,9 @@
             // Score response correctness
             const userResponse = data.response.response.trim().toLowerCase();
             const expectedSentence = currentSentenceData.text;
-
             const score = scoreHintResponse(expectedSentence, userResponse);
 
+            // Store data
             data.phase = 'pretest';
             data.user_response = userResponse;
             data.expected_sentence = expectedSentence;
@@ -599,13 +610,13 @@
             // Score response correctness
             const userResponse = data.response.response.trim().toLowerCase();
             const expectedSentence = currentSentenceData.text;
-
             const score = scoreHintResponse(expectedSentence, userResponse);
 
             // Store for feedback trial
             currentTrainingResponse = userResponse;
             firstAttemptScore = score;
 
+            // Store data
             data.phase = 'training';
             data.user_response = userResponse;
             data.expected_sentence = expectedSentence;
@@ -613,8 +624,6 @@
             data.words_total = score.total;
             data.proportion_correct = score.proportion;
             data.score_details = score.details;
-
-            // Don't adjust SNR yet - wait to see if they replay
         }
     };
 
@@ -622,16 +631,19 @@
     var training_feedback = {
         type: jsPsychHtmlButtonResponse,
         stimulus: function () {
+            // Generate feedback HTML
             let feedbackHTML = generateFeedbackHTML(
                 currentSentenceData.text,
                 currentTrainingResponse,
                 firstAttemptScore
             );
+
             // Add replay button only if score was incorrect
             if (firstAttemptScore.proportion < 1.0) {
-                feedbackHTML = feedbackHTML.replace('</div>', 
+                feedbackHTML = feedbackHTML.replace('</div>',
                     `<p style="margin-top: 20px;"><button id="replayBtn" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Replay Audio</button></p></div>`);
             }
+
             return feedbackHTML;
         },
         choices: ['Continue'],
@@ -652,6 +664,7 @@
             } else {
                 currentSNR = Math.min(currentSNR + stepSize, maxSNR);
             }
+
             // Reset first attempt score for next sentence
             firstAttemptScore = null;
         }
@@ -731,9 +744,9 @@
             // Score response correctness
             const userResponse = data.response.response.trim().toLowerCase();
             const expectedSentence = currentSentenceData.text;
-
             const score = scoreHintResponse(expectedSentence, userResponse);
 
+            // Store data
             data.phase = 'posttest';
             data.user_response = userResponse;
             data.expected_sentence = expectedSentence;
@@ -774,7 +787,7 @@
     /*********************************************************************************/
 
     // Timeline flow
-    timeline = [];
+    var timeline = [];
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
     timeline = timeline.concat(sound_check_procedure);
