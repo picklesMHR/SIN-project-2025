@@ -337,7 +337,6 @@
     };
 
     exp_block.push(start_trial);
-    exp_block.push(preload);
     exp_block.push(exp_procedure);
 
     /*********************************************************************************/
@@ -347,6 +346,7 @@
     // Timeline flow
     timeline = [];
     timeline = timeline.concat(participant_id_block);
+    timeline = timeline.concat(preload);
     timeline = timeline.concat(practice_instructions_block);
     timeline = timeline.concat(experiment_instructions_block);
     timeline = timeline.concat(exp_block);
