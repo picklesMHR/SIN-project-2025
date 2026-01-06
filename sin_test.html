@@ -26,6 +26,8 @@
     currentSNR = maxSNR;
     stepSize = 2; // dB
     var currentSentenceData = null; // Store current sentence object globally
+    var currentTrainingScore = null; // Store training trial score for feedback
+    var currentTrainingResponse = null; // Store training response for feedback
     var practiceSentences = []; // Pool of practice sentences
     var pretestSentences = []; // Pool of pretest sentences
     var trainingSentences = []; // Pool of training sentences
@@ -136,6 +138,38 @@
             proportion: correct / total,
             details
         };
+    }
+
+    // Generate HTML feedback comparing user response to expected sentence
+    function generateFeedbackHTML(expectedSentence, userResponse, score) {
+        // Compute expected words
+        const expected = expandSentence(expectedSentence);
+        const responseWords = normalise(userResponse).split(" ");
+
+        // Build feedback HTML
+        let feedbackHTML = '<div style="text-align: center; font-size: 18px;">';
+        feedbackHTML += '<h3>Feedback</h3>';
+        feedbackHTML += `<p><strong>Your score: ${score.correct}/${score.total} words correct (${Math.round(score.proportion * 100)}%)</strong></p>`;
+
+        // Show expected sentence with word-by-word highlighting
+        feedbackHTML += '<p style="margin: 20px 0;"><strong>Expected sentence:</strong></p>';
+        feedbackHTML += '<p style="font-size: 16px; line-height: 2; font-family: monospace;">';
+
+        // Highlight each word based on correctness
+        expected.forEach((options, i) => {
+            const matched = responseWords.some(w => options.includes(w));
+            const sentenceWords = expectedSentence.split(" ");
+            const displayWord = sentenceWords[i] || '';
+            const statusColor = matched ? 'green' : 'red';
+            feedbackHTML += `<span style="color: ${statusColor}; margin: 0 8px;">${displayWord}</span>`;
+        });
+
+        // Close expected sentence paragraph
+        feedbackHTML += '</p>';
+        feedbackHTML += `<p style="margin: 20px 0;"><strong>You wrote:</strong></p><p style="font-size: 16px; font-family: monospace; padding: 10px; background-color: #f0f0f0; border-radius: 4px;">"${userResponse}"</p>`;
+        feedbackHTML += '</div>';
+
+        return feedbackHTML;
     }
 
     /*********************************************************************************/
@@ -590,6 +624,10 @@
             const expectedSentence = currentSentenceData.text;
 
             const score = scoreHintResponse(expectedSentence, userResponse);
+
+            // Store training data globally for feedback trial
+            currentTrainingScore = score;
+            currentTrainingResponse = userResponse;
 
             data.phase = 'training';
             data.user_response = userResponse;
