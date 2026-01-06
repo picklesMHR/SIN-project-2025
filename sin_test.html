@@ -8,6 +8,7 @@
     <script src="jspsych/plugin-html-keyboard-response.js"></script>
     <script src="jspsych/plugin-survey-text.js"></script>
     <script src="jspsych/plugin-instructions.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
     <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -185,7 +186,36 @@
     /******************************* Sound Check Block *******************************/
     /*********************************************************************************/
 
+    var sound_check = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h2>Sound Check</h2>
+                   <p>Please ensure your headphones are on and the volume is set to a comfortable level.</p>
+                   <p>Click the button below to play a test sound.</p>`,
+        choices: ['Play Sound', 'Continue'],
+        on_finish: async function (data) {
+            // Only play if they clicked "Play Sound" (response = 0)
+            if (data.response === 0) {
+                if (audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
+                const buffer = await loadAudioBuffer('sound/speech/L00_S01.wav');
+                const testSource = audioCtx.createBufferSource();
+                testSource.buffer = buffer;
+                testSource.connect(audioCtx.destination);
+                testSource.start(audioCtx.currentTime + 0.1);
+            }
+        }
+    };
 
+    var sound_check_procedure = {
+        timeline: [sound_check],
+        loop_function: function (data) {
+            // Get the last trial
+            var lastTrial = data.last(1).values()[0];
+            // If they clicked "Play Sound" (response = 0), loop again
+            return lastTrial.response === 0;
+        }
+    };
 
     /*********************************************************************************/
     /****************************** Instructions Block *******************************/
@@ -427,6 +457,7 @@
     timeline = [];
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
+    timeline = timeline.concat(sound_check_procedure);
     timeline = timeline.concat(practice_instructions_block);
     timeline = timeline.concat(practice_block);
     timeline = timeline.concat(experiment_instructions_block);
