@@ -646,9 +646,22 @@
         }
     };
 
+    // Define feedback trial after each training question
+    var training_feedback = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function () {
+            return generateFeedbackHTML(
+                currentSentenceData.text,
+                currentTrainingResponse,
+                currentTrainingScore
+            );
+        },
+        choices: ['Continue']
+    };
+
     // Define training procedure (approximately 20 minutes, ~40 trials at ~30 sec/trial)
     var training_procedure = {
-        timeline: [training_sound, training_question],
+        timeline: [training_sound, training_question, training_feedback],
         repetitions: 40
     };
 
