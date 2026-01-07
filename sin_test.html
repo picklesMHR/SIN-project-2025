@@ -25,6 +25,8 @@
     var minSNR = -4; // dB
     var currentSNR = maxSNR; // Start at max SNR
     var stepSize = 2; // dB
+    var trainingDuration = 20 * 60 * 1000; // 20-minute training phase
+    var trainingStartTime = null; // Track when training begins
     var currentSentenceData = null; // Store current sentence object globally
     var currentTrainingResponse = null; // Store training response for feedback
     var firstAttemptScore = null; // Store first attempt score for SNR adjustment
@@ -346,7 +348,7 @@
             `<h2>Pre-test Complete</h2>
             <p>You have completed the pre-test section.</p>
             <p>Now, you will begin the training phase.</p>
-            <p>This section will take approximately 20 minutes.</p>
+            <p>This section will last approximately 20 minutes.</p>
             <p>Continue to listen to each sentence with background noise and type out the words you hear.</p>
             <p>The background noise level will continue to adjust based on your performance.</p>
             <p>Press 'Next' to start the training phase.</p>`
@@ -435,7 +437,7 @@
         }
     };
 
-    // Define practice procedure
+    // Define practice procedure (3 trials)
     var practice_procedure = {
         timeline: [practice_sound, practice_question],
         repetitions: 3
@@ -529,7 +531,7 @@
         }
     };
 
-    // Define pretest procedure
+    // Define pretest procedure (15 trials)
     var pretest_procedure = {
         timeline: [pretest_sound, pretest_question],
         repetitions: 15,
@@ -565,6 +567,8 @@
             }
             // Reset SNR for training
             currentSNR = maxSNR;
+            // Start training timer
+            trainingStartTime = performance.now();
         }
     };
 
@@ -670,10 +674,15 @@
         }
     };
 
-    // Define training procedure (approximately 20 minutes, ~40 trials at ~30 sec/trial)
+    // Define training procedure (20 minutes, max. 100 sentences)
     var training_procedure = {
         timeline: [training_sound, training_question, training_feedback],
-        repetitions: 40
+        loop_function: function () {
+            const elapsed = performance.now() - trainingStartTime;
+            const withinTime = elapsed < trainingDuration;
+            const hasSentences = trainingSentences.length > 0;
+            return withinTime && hasSentences;
+        }
     };
 
     training_block.push(training_start_trial);
@@ -764,7 +773,7 @@
         }
     };
 
-    // Define posttest procedure
+    // Define posttest procedure (15 trials)
     var posttest_procedure = {
         timeline: [posttest_sound, posttest_question],
         repetitions: 15,
