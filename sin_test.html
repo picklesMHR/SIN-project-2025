@@ -30,6 +30,7 @@
     var currentSentenceData = null; // Store current sentence object globally
     var currentTrainingResponse = null; // Store training response for feedback
     var firstAttemptScore = null; // Store first attempt score for SNR adjustment
+    var didReplayThisTrial = false; // Track replay usage for current training sentence
     var practiceSentences = []; // Pool of practice sentences
     var pretestSentences = []; // Pool of pretest sentences
     var trainingSentences = []; // Pool of training sentences
@@ -680,6 +681,8 @@
     var training_feedback = {
         type: jsPsychHtmlButtonResponse,
         stimulus: function () {
+            // Reset replay flag at start of feedback for this sentence
+            didReplayThisTrial = false;
             // Generate feedback HTML
             let feedbackHTML = generateFeedbackHTML(
                 currentSentenceData.text,
@@ -702,11 +705,19 @@
             if (replayBtn) {
                 replayBtn.onclick = function (e) {
                     e.preventDefault();
+                    // Mark replay used for this sentence
+                    didReplayThisTrial = true;
                     playReplayAudio();
                 };
             }
         },
         on_finish: function (data) {
+            // Attach replay flag to the corresponding training_question row
+            const lastTwo = jsPsych.data.get().last(2).values(); // [question, feedback]
+            const questionTrialIndex = lastTwo && lastTwo[0] ? lastTwo[0].trial_index : undefined;
+            if (questionTrialIndex !== undefined) {
+                jsPsych.data.get().filter({ trial_index: questionTrialIndex }).addToAll({ replay_used: didReplayThisTrial });
+            }
             // Adjust SNR based on FIRST attempt score
             if (firstAttemptScore.proportion === 1.0) {
                 currentSNR = Math.max(currentSNR - stepSize, minSNR);
