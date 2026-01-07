@@ -409,10 +409,17 @@
         allow_backward: false
     };
 
-    // Define training instructions block
+    // Define training instructions block (treatment) / break instructions (control)
     var training_instructions_block = {
         type: jsPsychInstructions,
-        pages: [
+        pages: isControlGroup ? [
+            `<h2>Pre-test Complete</h2>
+            <p>You have completed the pre-test section.</p>
+            <p>Now, you will take a 20-minute break.</p>
+            <p>You may read, browse, rest, or engage in any quiet activity of your choice.</p>
+            <p>We will notify you when the break is complete and the post-test is ready to begin.</p>
+            <p>Press 'Next' to begin your break.</p>`
+        ] : [
             `<h2>Pre-test Complete</h2>
             <p>You have completed the pre-test section.</p>
             <p>Now, you will begin the training phase.</p>
@@ -428,7 +435,15 @@
     // Define posttest instructions block
     var posttest_instructions_block = {
         type: jsPsychInstructions,
-        pages: [
+        pages: isControlGroup ? [
+            `<h2>Break Complete</h2>
+            <p>Your 20-minute break is now complete.</p>
+            <p>Now, the final post-test will begin.</p>
+            <p>Your task remains the same: listen to each sentence with background noise and type out the words you hear.</p>
+            <p>There will be a total of 15 sentences in this final section.</p>
+            <p>The background noise level will adjust based on your performance.</p>
+            <p>Press 'Next' to start the post-test.</p>`
+        ] : [
             `<h2>Training Complete</h2>
             <p>You have completed the training phase.</p>
             <p>Now, the final post-test will begin.</p>
@@ -859,6 +874,25 @@
     posttest_block.push(posttest_procedure);
 
     /*********************************************************************************/
+    /********************************** Break Block **********************************/
+    /*********************************************************************************/
+
+    // Define break block for control group (20 minutes)
+    var break_block = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<h2>Break in Progress</h2>
+                   <p>You are currently on your 20-minute break.</p>
+                   <p>Please wait. When your break is complete, the next screen will appear automatically.</p>`,
+        choices: "NO_KEYS",
+        trial_duration: 20 * 60 * 1000, // 20 minutes in milliseconds
+        on_finish: function () {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+    };
+
+    /*********************************************************************************/
     /******************************** Build Timeline *********************************/
     /*********************************************************************************/
 
@@ -871,10 +905,12 @@
     timeline = timeline.concat(practice_block);
     timeline = timeline.concat(pretest_instructions_block);
     timeline = timeline.concat(pretest_block);
-    // Only include training for treatment group
+    timeline = timeline.concat(training_instructions_block);
+    // Include training for treatment group OR break for control group
     if (!isControlGroup) {
-        timeline = timeline.concat(training_instructions_block);
         timeline = timeline.concat(training_block);
+    } else {
+        timeline = timeline.concat(break_block);
     }
     timeline = timeline.concat(posttest_instructions_block);
     timeline = timeline.concat(posttest_block);
