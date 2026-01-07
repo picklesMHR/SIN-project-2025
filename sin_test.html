@@ -34,6 +34,12 @@
     var pretestSentences = []; // Pool of pretest sentences
     var trainingSentences = []; // Pool of training sentences
     var posttestSentences = []; // Pool of posttest sentences
+    // Completion text
+    var finishText = `<h2>Thank You!</h2>
+                    <p>You have completed the speech-in-noise listening comprehension study.</p>
+                    <p>Your participation is greatly appreciated and will contribute to our understanding of how auditory processing training affects speech comprehension in noise for L2 English learners.</p>
+                    <p>Your data has been securely recorded. If you have any questions about this study or your results, please contact the research team.</p>
+                    <p>Thank you for your time and effort!</p>`
 
     /*********************************************************************************/
     /******************************* Global Functions ********************************/
@@ -223,6 +229,35 @@
         playAudioWithBabble(currentSentenceData.path, currentSNR);
     }
 
+    // Function to finish experiment and display thank you message
+    function finish() {
+        const DOM_target = document.querySelector('#jspsych-content');
+        DOM_target.innerHTML = finishText;
+        jsPsych.pluginAPI.cancelAllKeyboardResponses();
+        jsPsych.pluginAPI.clearAllTimeouts();
+    }
+
+    // Function to save data via AJAX to PHP endpoint
+    function saveDataToServer(csvData) {
+        fetch('save_data.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                participant_id: participant_id,
+                csv_data: csvData
+            })
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Data saved:', result);
+            })
+            .catch(error => {
+                console.error('Error saving data:', error);
+            });
+    }
+
     /*********************************************************************************/
     /***************************** Initialising jsPsych ******************************/
     /*********************************************************************************/
@@ -231,7 +266,26 @@
     var jsPsych = initJsPsych({
         show_progress_bar: true,
         on_finish: function () {
-            jsPsych.data.displayData();
+            // Get only pretest, posttest, and training phase data
+            const experimentalData = jsPsych.data.get().filterCustom(d =>
+                ['pretest', 'posttest', 'training'].includes(d.phase)
+            );
+            const csvData = experimentalData.csv();
+
+            // Save to server via PHP
+            saveDataToServer(csvData);
+
+            // Display finish message
+            finish();
+        },
+        on_close: function () {
+            // Backup save on tab close or reload
+            const experimentalData = jsPsych.data.get().filterCustom(d =>
+                ['pretest', 'posttest', 'training'].includes(d.phase)
+            );
+            const csvData = experimentalData.csv();
+
+            saveDataToServer(csvData);
         }
     });
 
@@ -266,8 +320,8 @@
         type: jsPsychSurveyText,
         questions: [{ prompt: "Please enter your participant ID:", name: "participant_id" }],
         on_finish: function (data) {
-            jsPsych.data.addProperties({ participant_id: data.response.Q0 });
-            participant_id = data.response.Q0;
+            jsPsych.data.addProperties({ participant_id: data.response.participant_id });
+            participant_id = data.response.participant_id;
         }
     };
 
@@ -369,19 +423,6 @@
             <p>Press 'Next' to start the post-test.</p>`
         ],
         show_clickable_nav: true
-    };
-
-    // Define debriefing block
-    var debriefing_block = {
-        type: jsPsychInstructions,
-        pages: [
-            `<h2>Thank You!</h2>
-            <p>You have completed the speech-in-noise listening comprehension study.</p>
-            <p>Your participation is greatly appreciated and will contribute to our understanding of how auditory processing training affects speech comprehension in noise for L2 English learners.</p>
-            <p>Your data has been securely recorded. If you have any questions about this study or your results, please contact the research team.</p>
-            <p>Thank you for your time and effort!</p>`
-        ],
-        show_clickable_nav: false
     };
 
     /*********************************************************************************/
@@ -808,7 +849,6 @@
     timeline = timeline.concat(training_block);
     timeline = timeline.concat(posttest_instructions_block);
     timeline = timeline.concat(posttest_block);
-    timeline = timeline.concat(debriefing_block);
 
     /*********************************************************************************/
     /********************************** Run jsPsych **********************************/
