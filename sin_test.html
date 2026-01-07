@@ -377,7 +377,8 @@
             <p>After each sentence, you will be prompted to enter your response.</p>
             <p>Press 'Next' to begin the practice section.</p>`
         ],
-        show_clickable_nav: true
+        show_clickable_nav: true,
+        allow_backward: false
     };
 
     // Define pretest instructions block
@@ -392,7 +393,8 @@
             <p>The background noise level will adjust based on your performance.</p>
             <p>Press 'Next' to start the pre-test.</p>`
         ],
-        show_clickable_nav: true
+        show_clickable_nav: true,
+        allow_backward: false
     };
 
     // Define training instructions block
@@ -407,7 +409,8 @@
             <p>The background noise level will continue to adjust based on your performance.</p>
             <p>Press 'Next' to start the training phase.</p>`
         ],
-        show_clickable_nav: true
+        show_clickable_nav: true,
+        allow_backward: false
     };
 
     // Define posttest instructions block
@@ -422,7 +425,8 @@
             <p>The background noise level will adjust based on your performance.</p>
             <p>Press 'Next' to start the post-test.</p>`
         ],
-        show_clickable_nav: true
+        show_clickable_nav: true,
+        allow_backward: false
     };
 
     /*********************************************************************************/
@@ -435,7 +439,7 @@
     // Simple start trial to begin practice
     var practice_start_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>Press space to start the practice section.</p>',
+        stimulus: '<p>Press space when ready.</p>',
         choices: [' '],
         // Ensure audio context is running
         on_finish: function () {
@@ -497,7 +501,7 @@
     // Simple start trial to begin pretest
     var pretest_start_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>Press space to start the pre-test.</p>',
+        stimulus: '<p>Press space when ready.</p>',
         choices: [' '],
         on_finish: function () {
             if (audioCtx.state === 'suspended') {
@@ -600,7 +604,7 @@
     // Simple start trial to begin training
     var training_start_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>Press space to start the training phase.</p>',
+        stimulus: '<p>Press space when ready.</p>',
         choices: [' '],
         on_finish: function () {
             if (audioCtx.state === 'suspended') {
@@ -739,7 +743,7 @@
     // Simple start trial to begin posttest
     var posttest_start_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>Press space to start the post-test.</p>',
+        stimulus: '<p>Press space when ready.</p>',
         choices: [' '],
         on_finish: function () {
             if (audioCtx.state === 'suspended') {
