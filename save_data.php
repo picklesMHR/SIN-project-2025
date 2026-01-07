@@ -1,4 +1,7 @@
 <?php
+// Set timezone to New Zealand
+date_default_timezone_set('Pacific/Auckland');
+
 // Set headers for JSON response
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
