@@ -20,6 +20,14 @@
     /******************************* Global Variables ********************************/
     /*********************************************************************************/
 
+    // Detect experiment condition from URL parameter
+    // Execute php -S localhost:8000
+    // For treatment group: http://localhost:8000/sin_test.html?condition=treatment
+    // For control group: http://localhost:8000/sin_test.html?condition=control
+    const urlParams = new URLSearchParams(window.location.search);
+    const experimentCondition = urlParams.get('condition') || 'treatment'; // default to treatment
+    const isControlGroup = experimentCondition === 'control';
+
     var participant_id = ''; // Participant ID
     var maxSNR = 12; // dB
     var minSNR = -4; // dB
@@ -860,8 +868,11 @@
     timeline = timeline.concat(practice_block);
     timeline = timeline.concat(pretest_instructions_block);
     timeline = timeline.concat(pretest_block);
-    timeline = timeline.concat(training_instructions_block);
-    timeline = timeline.concat(training_block);
+    // Only include training for treatment group
+    if (!isControlGroup) {
+        timeline = timeline.concat(training_instructions_block);
+        timeline = timeline.concat(training_block);
+    }
     timeline = timeline.concat(posttest_instructions_block);
     timeline = timeline.concat(posttest_block);
 
