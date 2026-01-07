@@ -536,9 +536,9 @@
         timeline: [pretest_sound, pretest_question],
         repetitions: 15,
         on_timeline_finish: function () {
-            // Calculate average SNR over last 10 trials
+            // Calculate average SNR over last 8 trials
             const snrData = jsPsych.data.get().filterCustom(d => d.phase === 'pretest' && Number.isFinite(d.SNR));
-            const snrValues = snrData.last(10).select('SNR').values;
+            const snrValues = snrData.last(8).select('SNR').values;
             const avgSNR = snrValues.length
                 ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
                 : null;
@@ -778,9 +778,9 @@
         timeline: [posttest_sound, posttest_question],
         repetitions: 15,
         on_timeline_finish: function () {
-            // Calculate average SNR over last 10 trials
+            // Calculate average SNR over last 8 trials
             const snrData = jsPsych.data.get().filterCustom(d => d.phase === 'posttest' && Number.isFinite(d.SNR));
-            const snrValues = snrData.last(10).select('SNR').values;
+            const snrValues = snrData.last(8).select('SNR').values;
             const avgSNR = snrValues.length
                 ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
                 : null;
