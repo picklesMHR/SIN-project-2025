@@ -329,7 +329,10 @@
         type: jsPsychSurveyText,
         questions: [{ prompt: "Please enter your participant ID:", name: "participant_id" }],
         on_finish: function (data) {
-            jsPsych.data.addProperties({ participant_id: data.response.participant_id });
+            jsPsych.data.addProperties({
+                participant_id: data.response.participant_id,
+                condition: experimentCondition
+            });
             participant_id = data.response.participant_id;
         }
     };
