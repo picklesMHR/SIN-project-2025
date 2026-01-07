@@ -51,7 +51,7 @@
                     <p>Thank you for your time and effort!</p>`
 
     /*********************************************************************************/
-    /******************************* Global Functions ********************************/
+    /**************************** User-Defined Functions *****************************/
     /*********************************************************************************/
 
     // Audio setup
@@ -355,7 +355,7 @@
                     await audioCtx.resume();
                 }
                 // Load and play test sound
-                const buffer = await loadAudioBuffer('sound/speech/L00_S01.wav');
+                const buffer = await loadAudioBuffer('sound/speech/L00_S02.wav');
                 const testSource = audioCtx.createBufferSource();
                 testSource.buffer = buffer;
                 testSource.connect(audioCtx.destination);
