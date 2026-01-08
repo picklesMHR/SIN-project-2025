@@ -22,8 +22,8 @@
 
     // Detect experiment condition from URL parameter
     // Execute php -S localhost:8000
-    // For treatment group: http://localhost:8000/sin_test.html?condition=treatment
-    // For control group: http://localhost:8000/sin_test.html?condition=control
+    // For treatment group: http://localhost:8000/sin_experiment.html?condition=treatment
+    // For control group: http://localhost:8000/sin_experiment.html?condition=control
     const urlParams = new URLSearchParams(window.location.search);
     const experimentCondition = urlParams.get('condition') || 'treatment'; // default to treatment
     const isControlGroup = experimentCondition === 'control';

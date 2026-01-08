@@ -11,7 +11,7 @@ The experiment supports two conditions via a URL parameter:
 
 ## Run Locally
 
-From the project folder (the one containing `sin_test.html`), start a local PHP server:
+From the project folder (the one containing `sin_experiment.html`), start a local PHP server:
 
 ```bash
 php -S localhost:8000
@@ -19,7 +19,7 @@ php -S localhost:8000
 
 Then open one of the following URLs:
 
-- Treatment: `http://localhost:8000/sin_test.html?condition=treatment`
-- Control: `http://localhost:8000/sin_test.html?condition=control`
+- Treatment: `http://localhost:8000/sin_experiment.html?condition=treatment`
+- Control: `http://localhost:8000/sin_experiment.html?condition=control`
 
 If `condition` is omitted, the experiment defaults to `treatment`.
