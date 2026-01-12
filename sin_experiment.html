@@ -737,8 +737,30 @@
                     playReplayAudio();
                 };
             }
+
+            // Allow Enter to continue
+            const continueBtn = document.querySelector('.jspsych-btn');
+            training_feedback._enterKeyListener = jsPsych.pluginAPI.getKeyboardResponse({
+                callback_function: function () {
+                    // Don't steal Enter from the replay button if it's focused
+                    const activeEl = document.activeElement;
+                    if (activeEl && activeEl.id === 'replayBtn') return;
+
+                    if (continueBtn) continueBtn.click();
+                },
+                valid_responses: ['Enter'],
+                rt_method: 'performance',
+                persist: false,
+                allow_held_key: false
+            });
         },
         on_finish: function (data) {
+            // Clean up Enter key listener
+            if (training_feedback._enterKeyListener) {
+                jsPsych.pluginAPI.cancelKeyboardResponse(training_feedback._enterKeyListener);
+                training_feedback._enterKeyListener = null;
+            }
+
             // Attach replay flag to the corresponding training_question row
             const lastTwo = jsPsych.data.get().last(2).values(); // [question, feedback]
             const questionTrialIndex = lastTwo && lastTwo[0] ? lastTwo[0].trial_index : undefined;
@@ -902,10 +924,10 @@
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
     timeline = timeline.concat(sound_check_procedure);
-    timeline = timeline.concat(practice_instructions_block);
-    timeline = timeline.concat(practice_block);
-    timeline = timeline.concat(pretest_instructions_block);
-    timeline = timeline.concat(pretest_block);
+    // timeline = timeline.concat(practice_instructions_block);
+    // timeline = timeline.concat(practice_block);
+    // timeline = timeline.concat(pretest_instructions_block);
+    // timeline = timeline.concat(pretest_block);
     timeline = timeline.concat(training_instructions_block);
     // Include training for treatment group OR break for control group
     if (!isControlGroup) {
