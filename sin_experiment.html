@@ -67,6 +67,14 @@
     let pretestCompleted = 0; // Track pretest progress
     let posttestCompleted = 0; // Track posttest progress
 
+    // Map of contractions to their expanded forms (for scoring)
+    const contractionMap = {
+        "they're": "they are",
+        "she's": "she is",
+        "he's": "he is",
+        "it's": "it is",
+    };
+
     /*********************************************************************************/
     /**************************** User-Defined Functions *****************************/
     /*********************************************************************************/
@@ -130,7 +138,30 @@
             .trim();
     }
 
+    // Get all word forms (word + any contractions/expansions it matches)
+    function getWordForms(word) {
+        const lowercaseWord = word.toLowerCase();
+        const normalized = normalise(word);
+        const forms = [normalized];
+
+        // Check if this is a contraction; if so, add both the expanded form with and without spaces
+        if (contractionMap[lowercaseWord]) {
+            const expanded = normalise(contractionMap[lowercaseWord]);
+            forms.push(expanded); // "they are"
+        }
+
+        // Check reverse: if this is an expansion, find and add the contraction
+        for (const [contraction, expansion] of Object.entries(contractionMap)) {
+            if (normalise(expansion) === normalized) {
+                forms.push(normalise(contraction));
+            }
+        }
+
+        return [...new Set(forms)]; // Remove duplicates
+    }
+
     // Expand "(A/The) boy (is/was) here" → [["a","the"],["boy"],["is","was"],["here"]]
+    // Also expands contractions, e.g., "they're" → ["theyre", "they are"]
     function expandSentence(rawSentence) {
         // Split sentence into tokens
         const tokens = rawSentence.split(" ");
@@ -138,6 +169,7 @@
 
         // Process each token
         tokens.forEach(token => {
+            // Handle parenthetical options like (a/the) or (is/was)
             if (token.startsWith("(") && token.endsWith(")")) {
                 const opts = token
                     .slice(1, -1)
@@ -145,7 +177,12 @@
                     .map(w => normalise(w));
                 expanded.push(opts);
             } else {
-                expanded.push([normalise(token)]);
+                // Remove trailing punctuation before processing
+                const cleanToken = token.replace(/[.,!?;:]+$/, "");
+                if (cleanToken) {
+                    // Include all forms (word + contractions/expansions)
+                    expanded.push(getWordForms(cleanToken));
+                }
             }
         });
 
@@ -166,14 +203,42 @@
         // Check each expected position for matches
         const details = expected.map((options, i) => {
             let match = false;
-            // Check if any unused response word matches this expected position
+            // Check if any unused response word(s) match this expected position
             for (let j = 0; j < responseWords.length; j++) {
-                if (!usedIndices.has(j) && options.includes(responseWords[j])) {
-                    match = true;
-                    correct++;
-                    usedIndices.add(j); // Mark this response word as used
-                    break; // Found a match, move to next expected word
+                if (usedIndices.has(j)) continue;
+
+                // Try each option at this position
+                for (let option of options) {
+                    // Single-word option: direct match
+                    if (!option.includes(" ") && option === responseWords[j]) {
+                        match = true;
+                        correct++;
+                        usedIndices.add(j);
+                        break;
+                    }
+                    // Multi-word option: try to match consecutive response words
+                    if (option.includes(" ")) {
+                        const optionWords = option.split(" ");
+                        let allMatch = true;
+                        // Check if the next N response words match this option
+                        for (let k = 0; k < optionWords.length; k++) {
+                            if (j + k >= responseWords.length || responseWords[j + k] !== optionWords[k]) {
+                                allMatch = false;
+                                break;
+                            }
+                        }
+                        if (allMatch) {
+                            match = true;
+                            correct++;
+                            // Mark all words in this option as used
+                            for (let k = 0; k < optionWords.length; k++) {
+                                usedIndices.add(j + k);
+                            }
+                            break;
+                        }
+                    }
                 }
+                if (match) break;
             }
             return {
                 options,
@@ -1031,12 +1096,12 @@
     var timeline = [];
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
-    timeline = timeline.concat(sound_check_procedure);
-    timeline = timeline.concat(practice_instructions_block);
-    timeline = timeline.concat(practice_block);
-    timeline = timeline.concat(pretest_instructions_block);
-    timeline = timeline.concat(pretest_block);
-    timeline = timeline.concat(training_instructions_block);
+    // timeline = timeline.concat(sound_check_procedure);
+    // timeline = timeline.concat(practice_instructions_block);
+    // timeline = timeline.concat(practice_block);
+    // timeline = timeline.concat(pretest_instructions_block);
+    // timeline = timeline.concat(pretest_block);
+    // timeline = timeline.concat(training_instructions_block);
     // Include training for treatment group OR break for control group
     if (!isControlGroup) {
         timeline = timeline.concat(training_block);
