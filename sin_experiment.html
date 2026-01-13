@@ -50,6 +50,23 @@
                     <p>Feel free to ask any questions you may have about the study or your participation.</p>
                     <p>Thank you for your time and effort!</p>`
 
+    // Manual progress bar updates
+    const PROGRESS_MARKERS = {
+        after_id: 0.02,
+        after_preload: 0.04,
+        after_soundcheck: 0.06,
+        after_practice_instructions: 0.08,
+        practice_end: 0.13,
+        after_pretest_instructions: 0.15,
+        pretest_end: 0.30,
+        after_training_instructions: 0.32,
+        training_end: 0.83,
+        after_posttest_instructions: 0.85
+    };
+    let practiceCompleted = 0; // Track practice progress
+    let pretestCompleted = 0; // Track pretest progress
+    let posttestCompleted = 0; // Track posttest progress
+
     /*********************************************************************************/
     /**************************** User-Defined Functions *****************************/
     /*********************************************************************************/
@@ -267,6 +284,12 @@
             });
     }
 
+    // Function to set progress bar value (0 to 1)
+    function setProgress(value) {
+        const clamped = Math.max(0, Math.min(1, value));
+        if (jsPsych.progressBar) jsPsych.progressBar.progress = clamped;
+    }
+
     /*********************************************************************************/
     /***************************** Initialising jsPsych ******************************/
     /*********************************************************************************/
@@ -274,6 +297,7 @@
     // Initialise jsPsych
     var jsPsych = initJsPsych({
         show_progress_bar: true,
+        auto_update_progress_bar: false,
         on_finish: function () {
             // Get only pretest, posttest, and training phase data
             const experimentalData = jsPsych.data.get().filterCustom(d =>
@@ -298,10 +322,14 @@
         }
     });
 
+
     // Preload audio files
     var preload = {
         type: jsPsychPreload,
         continue_after_error: true,
+        on_finish: function () {
+            setProgress(PROGRESS_MARKERS.after_preload);
+        },
         audio: function () {
             // Combine all sentence pools and extract paths
             const sentencePaths = [
@@ -328,12 +356,18 @@
     var participant_id_block = {
         type: jsPsychSurveyText,
         questions: [{ prompt: "Please enter your participant ID:", name: "participant_id" }],
+        on_load: function () {
+            // Set progress to start
+            setProgress(0);
+        },
         on_finish: function (data) {
             jsPsych.data.addProperties({
                 participant_id: data.response.participant_id,
                 condition: experimentCondition
             });
             participant_id = data.response.participant_id;
+
+            setProgress(PROGRESS_MARKERS.after_id);
         }
     };
 
@@ -371,7 +405,11 @@
             // Get the last trial
             var lastTrial = data.last(1).values()[0];
             // If they clicked "Play Sound" (response = 0), loop again
-            return lastTrial.response === 0;
+            const shouldLoop = lastTrial.response === 0;
+            if (!shouldLoop) {
+                setProgress(PROGRESS_MARKERS.after_soundcheck);
+            }
+            return shouldLoop;
         }
     };
 
@@ -390,7 +428,10 @@
             <p>Press 'Next' to begin the practice section.</p>`
         ],
         show_clickable_nav: true,
-        allow_backward: false
+        allow_backward: false,
+        on_finish: function () {
+            setProgress(PROGRESS_MARKERS.after_practice_instructions);
+        }
     };
 
     // Define pretest instructions block
@@ -406,7 +447,10 @@
             <p>Press 'Next' to start the pre-test.</p>`
         ],
         show_clickable_nav: true,
-        allow_backward: false
+        allow_backward: false,
+        on_finish: function () {
+            setProgress(PROGRESS_MARKERS.after_pretest_instructions);
+        }
     };
 
     // Define training instructions block (treatment) / break instructions (control)
@@ -430,7 +474,10 @@
             <p>Press 'Next' to start the training phase.</p>`
         ],
         show_clickable_nav: true,
-        allow_backward: false
+        allow_backward: false,
+        on_finish: function () {
+            setProgress(PROGRESS_MARKERS.after_training_instructions);
+        }
     };
 
     // Define posttest instructions block
@@ -454,7 +501,10 @@
             <p>Press 'Next' to start the post-test.</p>`
         ],
         show_clickable_nav: true,
-        allow_backward: false
+        allow_backward: false,
+        on_finish: function () {
+            setProgress(PROGRESS_MARKERS.after_posttest_instructions);
+        }
     };
 
     /*********************************************************************************/
@@ -474,6 +524,9 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+
+            practiceCompleted = 0;
+            setProgress(PROGRESS_MARKERS.after_practice_instructions);
         }
     };
 
@@ -507,6 +560,14 @@
             // No scoring or SNR adjustment in practice
             const userResponse = data.response.response.trim().toLowerCase();
             data.user_response = userResponse;
+
+            // Progress: practice is fixed at 3 sentences
+            practiceCompleted += 1;
+            const frac = Math.min(1, Math.max(0, practiceCompleted / 3));
+            setProgress(
+                PROGRESS_MARKERS.after_practice_instructions +
+                frac * (PROGRESS_MARKERS.practice_end - PROGRESS_MARKERS.after_practice_instructions)
+            );
         }
     };
 
@@ -537,6 +598,9 @@
             }
             // Reset SNR for pretest
             currentSNR = maxSNR;
+
+            pretestCompleted = 0;
+            setProgress(PROGRESS_MARKERS.after_pretest_instructions);
         }
     };
 
@@ -601,6 +665,14 @@
             } else {
                 currentSNR = Math.min(currentSNR + stepSize, maxSNR);
             }
+
+            // Progress: pretest is fixed at 15 sentences
+            pretestCompleted += 1;
+            const frac = Math.min(1, Math.max(0, pretestCompleted / 15));
+            setProgress(
+                PROGRESS_MARKERS.after_pretest_instructions +
+                frac * (PROGRESS_MARKERS.pretest_end - PROGRESS_MARKERS.after_pretest_instructions)
+            );
         }
     };
 
@@ -642,6 +714,8 @@
             currentSNR = maxSNR;
             // Start training timer
             trainingStartTime = performance.now();
+
+            setProgress(PROGRESS_MARKERS.after_training_instructions);
         }
     };
 
@@ -776,6 +850,13 @@
 
             // Reset first attempt score for next sentence
             firstAttemptScore = null;
+
+            // Progress: update based on elapsed training time
+            const elapsed = performance.now() - trainingStartTime;
+            const frac = Math.min(1, Math.max(0, elapsed / trainingDuration));
+            const p = PROGRESS_MARKERS.after_training_instructions +
+                frac * (PROGRESS_MARKERS.training_end - PROGRESS_MARKERS.after_training_instructions);
+            setProgress(p);
         }
     };
 
@@ -787,6 +868,10 @@
             const withinTime = elapsed < trainingDuration;
             const hasSentences = trainingSentences.length > 0;
             return withinTime && hasSentences;
+        },
+        on_timeline_finish: function () {
+            // Ensure we land exactly at the end of training segment
+            setProgress(PROGRESS_MARKERS.training_end);
         }
     };
 
@@ -811,6 +896,9 @@
             }
             // Reset SNR for posttest
             currentSNR = maxSNR;
+
+            posttestCompleted = 0;
+            setProgress(PROGRESS_MARKERS.after_posttest_instructions);
         }
     };
 
@@ -875,6 +963,14 @@
             } else {
                 currentSNR = Math.min(currentSNR + stepSize, maxSNR);
             }
+
+            // Progress: posttest is fixed at 15 sentences
+            posttestCompleted += 1;
+            const frac = Math.min(1, Math.max(0, posttestCompleted / 15));
+            setProgress(
+                PROGRESS_MARKERS.after_posttest_instructions +
+                frac * (1 - PROGRESS_MARKERS.after_posttest_instructions)
+            );
         }
     };
 
@@ -908,10 +1004,28 @@
                    <p>Please wait. When your break is complete, the next screen will appear automatically.</p>`,
         choices: "NO_KEYS",
         trial_duration: 20 * 60 * 1000, // 20 minutes in milliseconds
+        on_load: function () {
+            // Progress: update during the timed break
+            const start = performance.now();
+            break_block._progressInterval = window.setInterval(function () {
+                const elapsed = performance.now() - start;
+                const frac = Math.min(1, Math.max(0, elapsed / (20 * 60 * 1000)));
+                const p = PROGRESS_MARKERS.after_training_instructions +
+                    frac * (PROGRESS_MARKERS.training_end - PROGRESS_MARKERS.after_training_instructions);
+                setProgress(p);
+            }, 1000);
+        },
         on_finish: function () {
+            if (break_block._progressInterval) {
+                window.clearInterval(break_block._progressInterval);
+                break_block._progressInterval = null;
+            }
+
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+
+            setProgress(PROGRESS_MARKERS.training_end);
         }
     };
 
@@ -924,10 +1038,10 @@
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
     timeline = timeline.concat(sound_check_procedure);
-    // timeline = timeline.concat(practice_instructions_block);
-    // timeline = timeline.concat(practice_block);
-    // timeline = timeline.concat(pretest_instructions_block);
-    // timeline = timeline.concat(pretest_block);
+    timeline = timeline.concat(practice_instructions_block);
+    timeline = timeline.concat(practice_block);
+    timeline = timeline.concat(pretest_instructions_block);
+    timeline = timeline.concat(pretest_block);
     timeline = timeline.concat(training_instructions_block);
     // Include training for treatment group OR break for control group
     if (!isControlGroup) {
