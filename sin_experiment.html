@@ -35,6 +35,7 @@
     var stepSize = 2; // dB
     var trainingTrialLimit = 50; // Fixed number of training sentences
     var trainingTrialsCompleted = 0; // Count completed training sentences
+    var trainingFixedSNR = null; // Fixed SNR for training (set after pretest)
     var currentSentenceData = null; // Store current sentence object globally
     var currentTrainingResponse = null; // Store training response for feedback
     var firstAttemptScore = null; // Store first attempt score for SNR adjustment
@@ -753,6 +754,12 @@
                 ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
                 : null;
             jsPsych.data.addDataToLastTrial({ pretest_SNR_50: avgSNR });
+            
+            // Set training SNR to pretest_SNR_50 rounded down (harder difficulty)
+            if (avgSNR !== null) {
+                trainingFixedSNR = Math.floor(avgSNR / 2) * 2;
+                trainingFixedSNR = Math.max(trainingFixedSNR, minSNR); // Ensure within valid range
+            }
         }
     };
 
@@ -799,7 +806,7 @@
             const sentenceObj = getNextSentence(trainingSentences);
             currentSentenceData = sentenceObj;
 
-            playAudioWithBabble(currentSentenceData.path, currentSNR);
+            playAudioWithBabble(currentSentenceData.path, trainingFixedSNR);
         },
 
         // Store data for each trial
@@ -810,7 +817,7 @@
             data.sentence_id = sentenceData.id || '';
             data.sentence_text = sentenceData.text || '';
             data.list_id = sentenceData.listId || '';
-            data.SNR = currentSNR;
+            data.SNR = trainingFixedSNR;
         }
     };
 
@@ -903,12 +910,6 @@
             const questionTrialIndex = lastTwo && lastTwo[0] ? lastTwo[0].trial_index : undefined;
             if (questionTrialIndex !== undefined) {
                 jsPsych.data.get().filter({ trial_index: questionTrialIndex }).addToAll({ replay_used: didReplayThisTrial });
-            }
-            // Adjust SNR based on FIRST attempt score
-            if (firstAttemptScore.proportion === 1.0) {
-                currentSNR = Math.max(currentSNR - stepSize, minSNR);
-            } else {
-                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
             }
 
             // Reset first attempt score for next sentence
@@ -1099,9 +1100,9 @@
     // timeline = timeline.concat(sound_check_procedure);
     // timeline = timeline.concat(practice_instructions_block);
     // timeline = timeline.concat(practice_block);
-    // timeline = timeline.concat(pretest_instructions_block);
-    // timeline = timeline.concat(pretest_block);
-    // timeline = timeline.concat(training_instructions_block);
+    timeline = timeline.concat(pretest_instructions_block);
+    timeline = timeline.concat(pretest_block);
+    timeline = timeline.concat(training_instructions_block);
     // Include training for treatment group OR break for control group
     if (!isControlGroup) {
         timeline = timeline.concat(training_block);
