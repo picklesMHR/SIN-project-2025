@@ -170,12 +170,12 @@
 
         // Process each token
         tokens.forEach(token => {
-            // Handle parenthetical options like (a/the) or (is/was)
+            // Handle parenthetical options like (a/the) or (is/was) or (they're/they are)
             if (token.startsWith("(") && token.endsWith(")")) {
                 const opts = token
                     .slice(1, -1)
                     .split("/")
-                    .map(w => normalise(w));
+                    .flatMap(w => getWordForms(w)); // Apply getWordForms to handle contractions
                 expanded.push(opts);
             } else {
                 // Remove trailing punctuation before processing
