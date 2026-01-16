@@ -21,9 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Get the JSON data from the request body
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
+// Get data from request
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+// Handle both JSON (fetch) and form-encoded data (sendBeacon/FormData)
+if (strpos($contentType, 'application/json') !== false) {
+    // JSON request from fetch
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+} else if (strpos($contentType, 'multipart/form-data') !== false || empty($contentType)) {
+    // Form-encoded or multipart data from sendBeacon/FormData
+    $data = $_POST;
+} else {
+    // Try to parse as form-encoded or JSON fallback
+    $input = file_get_contents('php://input');
+    if (strpos($input, '{') === 0) {
+        $data = json_decode($input, true);
+    } else {
+        parse_str($input, $data);
+    }
+}
 
 if (!$data) {
     http_response_code(400);

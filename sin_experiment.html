@@ -329,7 +329,7 @@
         jsPsych.pluginAPI.clearAllTimeouts();
     }
 
-    // Function to save data via AJAX to PHP endpoint
+    // Function to save data via AJAX to PHP endpoint (async save during experiment)
     function saveDataToServer(csvData) {
         fetch('save_data.php', {
             method: 'POST',
@@ -348,6 +348,15 @@
             .catch(error => {
                 console.error('Error saving data:', error);
             });
+    }
+
+    // Function to save data reliably on page unload/reload using sendBeacon
+    function saveDataOnUnload(csvData) {
+        // Use FormData for sendBeacon as it handles encoding properly
+        const formData = new FormData();
+        formData.append('participant_id', participant_id);
+        formData.append('csv_data', csvData);
+        navigator.sendBeacon('save_data.php', formData);
     }
 
     // Function to set progress bar value (0 to 1)
@@ -378,13 +387,13 @@
             finish();
         },
         on_close: function () {
-            // Backup save on tab close or reload
+            // Backup save on tab close or reload using sendBeacon
             const experimentalData = jsPsych.data.get().filterCustom(d =>
                 ['pretest', 'posttest', 'training'].includes(d.phase)
             );
             const csvData = experimentalData.csv();
 
-            saveDataToServer(csvData);
+            saveDataOnUnload(csvData);
         }
     });
 
