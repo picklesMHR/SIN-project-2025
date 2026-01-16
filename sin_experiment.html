@@ -134,8 +134,8 @@
     function normalise(text) {
         return text
             .toLowerCase()
-            .replace(/[^\w\s]/g, "")
-            .replace(/\s+/g, " ")
+            .replace(/[^\w\s]/g, "") // Remove punctuation
+            .replace(/\s+/g, " ") // Collapse multiple spaces
             .trim();
     }
 
@@ -754,7 +754,7 @@
                 ? snrValues.reduce((sum, val) => sum + val, 0) / snrValues.length
                 : null;
             jsPsych.data.addDataToLastTrial({ pretest_SNR_50: avgSNR });
-            
+
             // Set training SNR to pretest_SNR_50 rounded down (harder difficulty)
             if (avgSNR !== null) {
                 trainingFixedSNR = Math.floor(avgSNR / 2) * 2;
@@ -1097,9 +1097,9 @@
     var timeline = [];
     timeline = timeline.concat(participant_id_block);
     timeline = timeline.concat(preload);
-    // timeline = timeline.concat(sound_check_procedure);
-    // timeline = timeline.concat(practice_instructions_block);
-    // timeline = timeline.concat(practice_block);
+    timeline = timeline.concat(sound_check_procedure);
+    timeline = timeline.concat(practice_instructions_block);
+    timeline = timeline.concat(practice_block);
     timeline = timeline.concat(pretest_instructions_block);
     timeline = timeline.concat(pretest_block);
     timeline = timeline.concat(training_instructions_block);
