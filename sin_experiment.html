@@ -313,12 +313,12 @@
         });
     }
 
-    // Function to play replay audio
-    function playReplayAudio() {
+    // Function to play replay audio (accepts SNR parameter for training phase)
+    function playReplayAudio(snr = currentSNR) {
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
-        playAudioWithBabble(currentSentenceData.path, currentSNR);
+        playAudioWithBabble(currentSentenceData.path, snr);
     }
 
     // Function to finish experiment and display thank you message
@@ -796,8 +796,6 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            // Reset SNR for training
-            currentSNR = maxSNR;
 
             setProgress(PROGRESS_MARKERS.after_training_instructions);
         }
@@ -892,7 +890,8 @@
                     e.preventDefault();
                     // Mark replay used for this sentence
                     didReplayThisTrial = true;
-                    playReplayAudio();
+                    // Use fixed training SNR for replay
+                    playReplayAudio(trainingFixedSNR);
                 };
             }
 
