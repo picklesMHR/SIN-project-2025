@@ -57,7 +57,6 @@
             { "id": "L15_S06", "text": "(A/The) child drank some fresh milk."},
             { "id": "L15_S07", "text": "(A/The) baby slept all night."},
             { "id": "L15_S08", "text": "(A/The) salt shaker (is/was) empty."},
-            { "id": "L15_S09", "text": "(A/The) policeman knows the way."},
             { "id": "L15_S10", "text": "The buckets fill up quickly."}
         ],
         "17": [
@@ -104,13 +103,10 @@
             { "id": "L23_S05", "text": "He grew lots of vegetables."},
             { "id": "L23_S06", "text": "She argues with her sister."},
             { "id": "L23_S07", "text": "(A/The) kitchen window (is/was) clean."},
-            { "id": "L23_S08", "text": "He hung up his raincoat."},
-            { "id": "L23_S09", "text": "(A/The) mailman brought (a/the) letter."},
             { "id": "L23_S10", "text": "(A/The) mother heard (a/the) baby."}
         ],
         "24": [
             { "id": "L24_S01", "text": "(A/The) waiter brought (a/the) cream."},
-            { "id": "L24_S02", "text": "(A/The) teapot (is/was) very hot."},
             { "id": "L24_S03", "text": "(An/The) apple pie (is/was) good."},
             { "id": "L24_S04", "text": "(A/The) lolly jar (is/was) full."},
             { "id": "L24_S05", "text": "(A/The) girl (is/was) washing her hair."},
