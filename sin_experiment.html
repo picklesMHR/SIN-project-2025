@@ -35,7 +35,7 @@
     var stepSize = 2; // dB
     var trainingTrialLimit = 50; // Fixed number of training sentences
     var trainingTrialsCompleted = 0; // Count completed training sentences
-    var trainingFixedSNR = null; // Fixed SNR for training (set after pretest)
+    var trainingConsecutiveCorrect = 0; // Count consecutive correct during training
     var currentSentenceData = null; // Store current sentence object globally
     var currentTrainingResponse = null; // Store training response for feedback
     var firstAttemptScore = null; // Store first attempt score for SNR adjustment
@@ -546,7 +546,7 @@
             <p>Now, you will begin the training phase.</p>
             <p>This section will last approximately 20 minutes.</p>
             <p>Continue to listen to each sentence with background noise and type out the words you hear.</p>
-            <p>The background noise level will remain fixed during this training phase.</p>
+            <p>The background noise level will adjust based on your performance.</p>
             <p>After each response, you will receive feedback on your performance and have the option to replay the audio.</p>
             <p>Remember to separate each word in your response with a space.</p>
             <p>Press 'Next' to start the training phase.</p>`
@@ -769,10 +769,10 @@
                 : null;
             jsPsych.data.addDataToLastTrial({ pretest_SNR_50: avgSNR });
 
-            // Set training SNR to pretest_SNR_50 rounded down (harder difficulty)
+            // Set adaptive training starting SNR from pretest average (rounded to stepSize)
             if (avgSNR !== null) {
-                trainingFixedSNR = Math.floor(avgSNR / 2) * 2;
-                trainingFixedSNR = Math.max(trainingFixedSNR, minSNR); // Ensure within valid range
+                const rounded = Math.round(avgSNR / stepSize) * stepSize;
+                currentSNR = Math.max(Math.min(rounded, maxSNR), minSNR);
             }
         }
     };
@@ -818,7 +818,7 @@
             const sentenceObj = getNextSentence(trainingSentences);
             currentSentenceData = sentenceObj;
 
-            playAudioWithBabble(currentSentenceData.path, trainingFixedSNR);
+            playAudioWithBabble(currentSentenceData.path, currentSNR);
         },
 
         // Store data for each trial
@@ -829,7 +829,7 @@
             data.sentence_id = sentenceData.id || '';
             data.sentence_text = sentenceData.text || '';
             data.list_id = sentenceData.listId || '';
-            data.SNR = trainingFixedSNR;
+            data.SNR = currentSNR;
         }
     };
 
@@ -857,6 +857,7 @@
             data.words_total = score.total;
             data.proportion_correct = score.proportion;
             data.score_details = score.details;
+            data.training_SNR_before = currentSNR;
         }
     };
 
@@ -890,8 +891,8 @@
                     e.preventDefault();
                     // Mark replay used for this sentence
                     didReplayThisTrial = true;
-                    // Use fixed training SNR for replay
-                    playReplayAudio(trainingFixedSNR);
+                    // Replay using the SNR that was used for this trial (currentSNR)
+                    playReplayAudio(currentSNR);
                 };
             }
 
@@ -918,11 +919,25 @@
                 training_feedback._enterKeyListener = null;
             }
 
-            // Attach replay flag to the corresponding training_question row
+            // Apply adaptive 2-down/1-up SNR adjustment
+            if (firstAttemptScore.proportion === 1.0) {
+                trainingConsecutiveCorrect += 1;
+                // After 2 consecutive correct, decrease SNR
+                if (trainingConsecutiveCorrect >= 2) {
+                    currentSNR = Math.max(currentSNR - stepSize, minSNR);
+                    trainingConsecutiveCorrect = 0;
+                }
+            } else {
+                // On any incorrect response, increase SNR
+                currentSNR = Math.min(currentSNR + stepSize, maxSNR);
+                trainingConsecutiveCorrect = 0;
+            }
+
+            // Attach replay flag and the updated SNR to the corresponding training_question row
             const lastTwo = jsPsych.data.get().last(2).values(); // [question, feedback]
             const questionTrialIndex = lastTwo && lastTwo[0] ? lastTwo[0].trial_index : undefined;
             if (questionTrialIndex !== undefined) {
-                jsPsych.data.get().filter({ trial_index: questionTrialIndex }).addToAll({ replay_used: didReplayThisTrial });
+                jsPsych.data.get().filter({ trial_index: questionTrialIndex }).addToAll({ training_SNR_after: currentSNR, replay_used: didReplayThisTrial });
             }
 
             // Reset first attempt score for next sentence
