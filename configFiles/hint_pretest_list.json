@@ -1,23 +1,35 @@
 {
     "rawLists": {
-        "1": [
-            { "id": "L01_S01", "text": "(A/The) boy fell from (a/the) window."},
-            { "id": "L01_S02", "text": "(A/The) wife helped her husband."},
-            { "id": "L01_S03", "text": "Big dogs can be dangerous."},
-            { "id": "L01_S04", "text": "Her shoes (are/were) very dirty."},
-            { "id": "L01_S05", "text": "(A/The) player lost (a/the) shoe."},
-            { "id": "L01_S06", "text": "Somebody stole the money."},
-            { "id": "L01_S07", "text": "(A/The) fire (is/was) very hot."},
-            { "id": "L01_S08", "text": "She's drinking from her own cup."},
-            { "id": "L01_S09", "text": "(A/The) picture came from (a/the) book."},
-            { "id": "L01_S10", "text": "(A/The) car (is/was) going too fast."}
+        "3": [
+            { "id": "L03_S01", "text": "They heard (a/the) funny noise."},
+            { "id": "L03_S02", "text": "He found his brother hiding."},
+            { "id": "L03_S03", "text": "(A/The) dog played with (a/the) stick."},
+            { "id": "L03_S04", "text": "(A/The) book tells (a/the) story."},
+            { "id": "L03_S06", "text": "The milk (is/was) by (a/the) front door."},
+            { "id": "L03_S08", "text": "(A/The) new road (is/was) on (a/the) map."},
+            { "id": "L03_S09", "text": "She lost her credit card."},
+            { "id": "L03_S10", "text": "(A/The) team (is/was) playing well."}
         ],
-        "8": [
-            { "id": "L08_S01", "text": "(A/The) ball bounced very high."},
-            { "id": "L08_S02", "text": "Mother cut (a/the) birthday cake."},
-            { "id": "L08_S03", "text": "(A/The) football game (is/was) over."},
-            { "id": "L08_S04", "text": "She stood near (a/the) window."},
-            { "id": "L08_S05", "text": "(A/The) kitchen clock (is/was) wrong."}           
+        "13": [
+            { "id": "L13_S02", "text": "(A/The) table (has/had) three legs."},
+            { "id": "L13_S03", "text": "The children waved at (a/the) train."},
+            { "id": "L13_S04", "text": "Her coat (is/was) on (a/the) chair."},
+            { "id": "L13_S05", "text": "(A/The) girl (is/was) fixing her dress."},
+            { "id": "L13_S06", "text": "It's time to go to bed."},
+            { "id": "L13_S07", "text": "Mother read the instructions."},
+            { "id": "L13_S08", "text": "(A/The) dog (is/was) eating some meat."},
+            { "id": "L13_S09", "text": "Father forgot the bread."},
+            { "id": "L13_S10", "text": "(A/The) road goes up (a/the) hill."}
+        ],
+        "17": [
+            { "id": "L17_S01", "text": "Mother picked some flowers."},
+            { "id": "L17_S02", "text": "(A/The) puppy played with (a/the) ball."},
+            { "id": "L17_S03", "text": "(An/The) engine (is/was) running."},
+            { "id": "L17_S05", "text": "They're watching (a/the) train go by."},
+            { "id": "L17_S06", "text": "(An/The) oven (is/was) too hot."},
+            { "id": "L17_S08", "text": "(A/The) big fish got away."},
+            { "id": "L17_S09", "text": "They laughed at his story."},
+            { "id": "L17_S10", "text": "They walked across the grass."}
         ]
     }
 }

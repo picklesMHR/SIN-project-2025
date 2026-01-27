@@ -1,19 +1,31 @@
 {
     "rawLists": {
-        "3": [
-            { "id": "L03_S01", "text": "They heard (a/the) funny noise."},
-            { "id": "L03_S02", "text": "He found his brother hiding."},
-            { "id": "L03_S03", "text": "(A/The) dog played with (a/the) stick."},
-            { "id": "L03_S04", "text": "(A/The) book tells (a/the) story."},
-            { "id": "L03_S05", "text": "The matches (are/were) on (a/the) shelf."},
-            { "id": "L03_S06", "text": "The milk (is/was) by (a/the) front door."},
-            { "id": "L03_S07", "text": "(A/The) broom (is/was) in (a/the) corner."},
-            { "id": "L03_S08", "text": "(A/The) new road (is/was) on (a/the) map."},
-            { "id": "L03_S09", "text": "She lost her credit card."},
-            { "id": "L03_S10", "text": "(A/The) team (is/was) playing well."}
+        "1": [
+            { "id": "L01_S01", "text": "(A/The) boy fell from (a/the) window."},
+            { "id": "L01_S02", "text": "(A/The) wife helped her husband."},
+            { "id": "L01_S03", "text": "Big dogs can be dangerous."},
+            { "id": "L01_S04", "text": "Her shoes (are/were) very dirty."},
+            { "id": "L01_S05", "text": "(A/The) player lost (a/the) shoe."},
+            { "id": "L01_S06", "text": "Somebody stole the money."},
+            { "id": "L01_S07", "text": "(A/The) fire (is/was) very hot."},
+            { "id": "L01_S08", "text": "She's drinking from her own cup."},
+            { "id": "L01_S09", "text": "(A/The) picture came from (a/the) book."},
+            { "id": "L01_S10", "text": "(A/The) car (is/was) going too fast."}
+        ],
+        "4": [
+            { "id": "L04_S01", "text": "(A/The) little boy left home."},
+            { "id": "L04_S02", "text": "They are going out tonight."},
+            { "id": "L04_S03", "text": "(A/The) cat jumped over (a/the) fence."},
+            { "id": "L04_S04", "text": "He wore his yellow shirt."},
+            { "id": "L04_S05", "text": "(A/The) lady sits in her chair."},
+            { "id": "L04_S06", "text": "He needs his vacation."},
+            { "id": "L04_S10", "text": "(A/The) lady packed her bag."}
         ],
         "8": [
-            { "id": "L08_S06", "text": "The children helped their teacher."},
+            { "id": "L08_S01", "text": "(A/The) ball bounced very high."},
+            { "id": "L08_S03", "text": "(A/The) football game (is/was) over."},
+            { "id": "L08_S04", "text": "She stood near (a/the) window."},
+            { "id": "L08_S05", "text": "(A/The) kitchen clock (is/was) wrong."},
             { "id": "L08_S07", "text": "They carried some shopping bags."},
             { "id": "L08_S08", "text": "Someone (is/was) crossing (a/the) road."},
             { "id": "L08_S09", "text": "She uses her spoon to eat."},
