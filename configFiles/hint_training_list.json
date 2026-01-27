@@ -1,14 +1,39 @@
 {
     "rawLists": {
+        "2": [
+            { "id": "L02_S01", "text": "(A/The) boy ran down (a/the) path."},
+            { "id": "L02_S04", "text": "(A/The) shop closes for lunch."},
+            { "id": "L02_S05", "text": "(A/The) police helped (a/the) driver."},
+            { "id": "L02_S06", "text": "She looked in her mirror."},
+            { "id": "L02_S07", "text": "(A/The) match fell on (a/the) floor."},
+            { "id": "L02_S08", "text": "(A/The) fruit came in (a/the) box."},
+            { "id": "L02_S09", "text": "He really scared his sister."}
+        ],
+        "5": [
+            { "id": "L05_S02", "text": "They took some food outside."},
+            { "id": "L05_S03", "text": "(A/The) young people (are/were) dancing."},
+            { "id": "L05_S06", "text": "They watched (a/the) scary movie."},
+            { "id": "L05_S07", "text": "(A/The) milk (is/was) in (a/the) bottle."},
+            { "id": "L05_S08", "text": "(A/The) truck drove up (a/the) road."},
+            { "id": "L05_S10", "text": "(A/The) letter fell on (a/the) floor."}
+        ],
         "10": [
             { "id": "L10_S01", "text": "(A/The) boy broke (a/the) wooden fence."},
             { "id": "L10_S02", "text": "(An/The) angry man shouted."},
-            { "id": "L10_S04", "text": "(A/The) nervous driver got lost."},
             { "id": "L10_S05", "text": "(A/The) cook (is/was) baking (a/the) cake."},
             { "id": "L10_S07", "text": "(A/The) fish swam in (a/the) pond."},
             { "id": "L10_S08", "text": "They met some friends at dinner."},
             { "id": "L10_S09", "text": "(A/The) man called the police."},
             { "id": "L10_S10", "text": "(A/The) truck made it up (a/the) hill."}
+        ],
+        "11": [
+            { "id": "L11_S03", "text": "(An/The) orange (is/was) very sweet."},
+            { "id": "L11_S04", "text": "He took the dogs for a walk."},
+            { "id": "L11_S06", "text": "Her sister stayed for lunch."},
+            { "id": "L11_S07", "text": "(A/The) train (is/was) moving fast."},
+            { "id": "L11_S08", "text": "Mother shut (a/the) window."},
+            { "id": "L11_S09", "text": "(A/The) bakery (is/was) open."},
+            { "id": "L11_S10", "text": "Snow falls in the winter."}
         ],
         "12": [
             { "id": "L12_S01", "text": "(A/The) boy went to bed early."},
@@ -28,6 +53,15 @@
             { "id": "L15_S07", "text": "(A/The) baby slept all night."},
             { "id": "L15_S10", "text": "The buckets fill up quickly."}
         ],
+        "18": [
+            { "id": "L18_S01", "text": "(A/The) boy (is/was) running away."},
+            { "id": "L18_S02", "text": "(A/The) towel (is/was) near (a/the) sink."},
+            { "id": "L18_S03", "text": "Flowers can grow in (a/the) pot."},
+            { "id": "L18_S04", "text": "He's skating with his friend."},
+            { "id": "L18_S06", "text": "(A/The) lady washed (a/the) shirt."},
+            { "id": "L18_S09", "text": "(A/The) man (is/was) painting (a/the) sign."},
+            { "id": "L18_S10", "text": "(A/The) dog came home at last."}
+        ],
         "19": [
             { "id": "L19_S01", "text": "(A/The) painter uses (a/the) brush."},
             { "id": "L19_S03", "text": "Swimmers can hold their breath."},
@@ -44,7 +78,6 @@
             { "id": "L22_S06", "text": "They had a wonderful day."},
             { "id": "L22_S07", "text": "(An/The) exit (is/was) well lit."},
             { "id": "L22_S08", "text": "(A/The) train stops at (a/the) station."},
-            { "id": "L22_S09", "text": "He (is/was) sucking his thumb."},
             { "id": "L22_S10", "text": "(A/The) big boy kicked the ball."}
         ],
         "23": [

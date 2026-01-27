@@ -33,7 +33,7 @@
     var minSNR = -6; // dB
     var currentSNR = maxSNR; // Start at max SNR
     var stepSize = 2; // dB
-    var trainingTrialLimit = 50; // Fixed number of training sentences
+    var trainingTrialLimit = 75; // Fixed number of training sentences
     var trainingTrialsCompleted = 0; // Count completed training sentences
     var trainingConsecutiveCorrect = 0; // Count consecutive correct during training
     var currentSentenceData = null; // Store current sentence object globally
@@ -985,7 +985,7 @@
         }
     };
 
-    // Define training procedure (50 sentences, approx. 20 minutes)
+    // Define training procedure (75 sentences, approx. 35 minutes)
     var training_procedure = {
         timeline: [training_sound, training_question, training_feedback],
         repetitions: trainingTrialLimit,
