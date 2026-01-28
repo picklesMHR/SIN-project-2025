@@ -26,15 +26,6 @@
             { "id": "L10_S09", "text": "(A/The) man called the police."},
             { "id": "L10_S10", "text": "(A/The) truck made it up (a/the) hill."}
         ],
-        "11": [
-            { "id": "L11_S03", "text": "(An/The) orange (is/was) very sweet."},
-            { "id": "L11_S04", "text": "He took the dogs for a walk."},
-            { "id": "L11_S06", "text": "Her sister stayed for lunch."},
-            { "id": "L11_S07", "text": "(A/The) train (is/was) moving fast."},
-            { "id": "L11_S08", "text": "Mother shut (a/the) window."},
-            { "id": "L11_S09", "text": "(A/The) bakery (is/was) open."},
-            { "id": "L11_S10", "text": "Snow falls in the winter."}
-        ],
         "12": [
             { "id": "L12_S01", "text": "(A/The) boy went to bed early."},
             { "id": "L12_S03", "text": "(A/The) sharp knife (is/was) dangerous."},
@@ -53,18 +44,8 @@
             { "id": "L15_S07", "text": "(A/The) baby slept all night."},
             { "id": "L15_S10", "text": "The buckets fill up quickly."}
         ],
-        "18": [
-            { "id": "L18_S01", "text": "(A/The) boy (is/was) running away."},
-            { "id": "L18_S02", "text": "(A/The) towel (is/was) near (a/the) sink."},
-            { "id": "L18_S03", "text": "Flowers can grow in (a/the) pot."},
-            { "id": "L18_S04", "text": "He's skating with his friend."},
-            { "id": "L18_S06", "text": "(A/The) lady washed (a/the) shirt."},
-            { "id": "L18_S09", "text": "(A/The) man (is/was) painting (a/the) sign."},
-            { "id": "L18_S10", "text": "(A/The) dog came home at last."}
-        ],
         "19": [
             { "id": "L19_S01", "text": "(A/The) painter uses (a/the) brush."},
-            { "id": "L19_S03", "text": "Swimmers can hold their breath."},
             { "id": "L19_S05", "text": "They're pushing an old car."},
             { "id": "L19_S06", "text": "The food (is/was) expensive."},
             { "id": "L19_S07", "text": "The children (are/were) walking home."},
